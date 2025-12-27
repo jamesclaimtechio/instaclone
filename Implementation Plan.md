@@ -91,18 +91,18 @@ Total:         [█░░░░░░░░░] 8% (1/13 modules)
 
 ---
 
-### ⬜ Module 2: Core Authentication System
+### 🚧 Module 2: Core Authentication System
 
 **Duration:** 10-12 hours
 
-**Dependencies:** Module 1 complete
+**Dependencies:** Module 1 complete ✅
 
 **Deliverables:**
 
 - [ ]  Registration page with email, password, username
 - [ ]  Login page with credential validation
-- [ ]  JWT generation with bcrypt password hashing
-- [ ]  HTTP-only cookie implementation
+- [x]  JWT generation with bcrypt password hashing
+- [x]  HTTP-only cookie implementation
 - [ ]  Middleware protecting routes
 - [ ]  Logout functionality
 

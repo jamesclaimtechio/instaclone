@@ -6,16 +6,16 @@
 
 ## 📊 Current Status
 
-**Active Module:** Module 1 - Project Setup & Database Schema  
-**Active Chunk:** Chunk 1.1 - Next.js App Initialization  
-**Status:** 🚧 In Progress  
+**Active Module:** Module 2 - Core Authentication System  
+**Active Chunk:** Chunk 2.1 - Auth Utilities & JWT Infrastructure  
+**Status:** ✅ Complete  
 **Started:** December 27, 2025
 
 ---
 
 ## 🎯 Module Progress
 
-### Module 1: Project Setup & Database Schema (0/3 chunks)
+### Module 1: Project Setup & Database Schema ✅ (3/3 chunks)
 
 | Chunk | Name | Status | Started | Completed | Duration |
 |-------|------|--------|---------|-----------|----------|
@@ -24,7 +24,21 @@
 | 1.3 | shadcn/ui & Environment Setup | ✅ Complete | Dec 27, 2025 | Dec 27, 2025 | ~25 min |
 
 **Module Status:** ✅ Complete (3/3 chunks complete)  
+**Actual Duration:** ~1.7 hours  
 **Estimated Duration:** 6-8 hours total
+
+### Module 2: Core Authentication System (1/5 chunks)
+
+| Chunk | Name | Status | Started | Completed | Duration |
+|-------|------|--------|---------|-----------|----------|
+| 2.1 | Auth Utilities & JWT Infrastructure | ✅ Complete | Dec 27, 2025 | Dec 27, 2025 | ~35 min |
+| 2.2 | User Registration Flow | ⏳ Not Started | - | - | - |
+| 2.3 | Login & Logout Flow | ⏳ Not Started | - | - | - |
+| 2.4 | Auth Middleware & Route Protection | ⏳ Not Started | - | - | - |
+| 2.5 | Registration & Login UI | ⏳ Not Started | - | - | - |
+
+**Module Status:** 🚧 In Progress (1/5 chunks complete)  
+**Estimated Duration:** 14-18 hours total
 
 ---
 
@@ -149,6 +163,33 @@
 - cn() utility uses tailwind-merge to intelligently handle overlapping Tailwind classes
 - Components auto-install their Radix UI primitive dependencies
 - CSS variables enable easy theming and dark mode support
+
+### Chunk 2.1 - Auth Utilities & JWT Infrastructure ✅
+**Completed:** December 27, 2025  
+**Duration:** ~35 minutes  
+**Key Achievements:**
+- Installed jose v6.1.3 for modern JWT operations
+- Implemented hashPassword() with bcrypt cost 12 (~270ms per hash)
+- Implemented verifyPassword() with timing-safe comparison
+- Implemented generateToken() with 30-day expiration
+- Implemented verifyToken() with signature and expiration validation
+- Created custom error classes (TokenExpiredError, InvalidTokenError)
+- Implemented cookie utilities with security flags (httpOnly, secure, sameSite=strict)
+- Created getCurrentUser() helper for auth checks throughout app
+- Added JWT_SECRET startup validation (64+ characters required)
+- All 8 verification tests passed successfully
+
+**Challenges:**
+- Next.js 15+ cookies() returns Promise, needed to await in all cookie functions
+- JWT_SECRET validation must happen at module load to catch config errors early
+- Verification script needed JWT_SECRET in environment to run tests
+
+**Learnings:**
+- jose uses Uint8Array for secret keys, must encode string with TextEncoder
+- bcrypt.hash() is async and takes ~250-300ms (intentionally slow for security)
+- JWT expiration must be in seconds (not milliseconds) for exp claim
+- Cookie utilities must be async in Next.js 15+ App Router
+- Token verification should return null (not throw) for graceful degradation in getCurrentUser()
 
 ---
 

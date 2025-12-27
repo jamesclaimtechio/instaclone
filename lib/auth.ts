@@ -154,8 +154,8 @@ export async function verifyToken(token: string): Promise<JWTPayload> {
  * Sets the authentication token in an HTTP-only cookie
  * @param token - JWT string to store
  */
-export function setAuthCookie(token: string): void {
-  const cookieStore = cookies();
+export async function setAuthCookie(token: string): Promise<void> {
+  const cookieStore = await cookies();
   
   cookieStore.set(COOKIE_NAME, token, {
     httpOnly: true,
@@ -170,8 +170,8 @@ export function setAuthCookie(token: string): void {
  * Reads the authentication token from cookies
  * @returns JWT string if present, undefined otherwise
  */
-export function getAuthCookie(): string | undefined {
-  const cookieStore = cookies();
+export async function getAuthCookie(): Promise<string | undefined> {
+  const cookieStore = await cookies();
   const cookie = cookieStore.get(COOKIE_NAME);
   return cookie?.value;
 }
@@ -179,8 +179,8 @@ export function getAuthCookie(): string | undefined {
 /**
  * Deletes the authentication cookie (logout)
  */
-export function deleteAuthCookie(): void {
-  const cookieStore = cookies();
+export async function deleteAuthCookie(): Promise<void> {
+  const cookieStore = await cookies();
   
   cookieStore.set(COOKIE_NAME, '', {
     httpOnly: true,
@@ -202,7 +202,7 @@ export function deleteAuthCookie(): void {
  */
 export async function getCurrentUser(): Promise<JWTPayload | null> {
   try {
-    const token = getAuthCookie();
+    const token = await getAuthCookie();
     
     if (!token) {
       return null;
