@@ -99,7 +99,7 @@ Total:         [█░░░░░░░░░] 8% (1/13 modules)
 
 **Deliverables:**
 
-- [ ]  Registration page with email, password, username
+- [x]  Registration Server Action (logic complete, UI in Chunk 2.5)
 - [ ]  Login page with credential validation
 - [x]  JWT generation with bcrypt password hashing
 - [x]  HTTP-only cookie implementation

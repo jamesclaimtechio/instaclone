@@ -32,12 +32,12 @@
 | Chunk | Name | Status | Started | Completed | Duration |
 |-------|------|--------|---------|-----------|----------|
 | 2.1 | Auth Utilities & JWT Infrastructure | ✅ Complete | Dec 27, 2025 | Dec 27, 2025 | ~35 min |
-| 2.2 | User Registration Flow | ⏳ Not Started | - | - | - |
+| 2.2 | User Registration Flow | ✅ Complete | Dec 27, 2025 | Dec 27, 2025 | ~25 min |
 | 2.3 | Login & Logout Flow | ⏳ Not Started | - | - | - |
 | 2.4 | Auth Middleware & Route Protection | ⏳ Not Started | - | - | - |
 | 2.5 | Registration & Login UI | ⏳ Not Started | - | - | - |
 
-**Module Status:** 🚧 In Progress (1/5 chunks complete)  
+**Module Status:** 🚧 In Progress (2/5 chunks complete)  
 **Estimated Duration:** 14-18 hours total
 
 ---
@@ -190,6 +190,34 @@
 - JWT expiration must be in seconds (not milliseconds) for exp claim
 - Cookie utilities must be async in Next.js 15+ App Router
 - Token verification should return null (not throw) for graceful degradation in getCurrentUser()
+
+### Chunk 2.2 - User Registration Flow ✅
+**Completed:** December 27, 2025  
+**Duration:** ~25 minutes  
+**Key Achievements:**
+- Created registerUser Server Action in app/actions/auth.ts
+- Implemented email format validation (RFC 5322 simplified regex)
+- Implemented username format validation (alphanumeric + underscore/hyphen)
+- Implemented password validation (non-empty, max 1000 chars, no other restrictions)
+- Email uniqueness check with case-insensitive matching (LOWER() SQL function)
+- Username uniqueness check with case-sensitive matching
+- Database insert with emailVerified=false and isAdmin=false defaults
+- Race condition handling for unique constraint violations
+- Post-registration auto-login with JWT cookie
+- Field-specific error responses for better UX
+- All 6 validation tests passed
+
+**Challenges:**
+- Next.js redirect() cannot be tested in standalone scripts (throws NEXT_REDIRECT signal)
+- Drizzle sql template literal needed for LOWER() function in case-insensitive email query
+- Race condition requires catching Postgres error code 23505 and parsing error message
+
+**Learnings:**
+- Email must be normalized to lowercase before storage AND checking
+- Username is case-sensitive per spec (John and john are different users)
+- Race conditions handled at database level, not just application checks
+- redirect() in Server Actions throws special error caught by Next.js framework
+- FormData extraction requires .toString() and null coalescing for type safety
 
 ---
 
