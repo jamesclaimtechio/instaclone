@@ -20,10 +20,10 @@
 | Chunk | Name | Status | Started | Completed | Duration |
 |-------|------|--------|---------|-----------|----------|
 | 1.1 | Next.js App Initialization | ✅ Complete | Dec 27, 2025 | Dec 27, 2025 | ~30 min |
-| 1.2 | Database Schema & Drizzle ORM | ⏳ Not Started | - | - | - |
+| 1.2 | Database Schema & Drizzle ORM | ✅ Complete | Dec 27, 2025 | Dec 27, 2025 | ~45 min |
 | 1.3 | shadcn/ui & Environment Setup | ⏳ Not Started | - | - | - |
 
-**Module Status:** 🚧 In Progress (1/3 chunks complete)  
+**Module Status:** 🚧 In Progress (2/3 chunks complete)  
 **Estimated Duration:** 6-8 hours total
 
 ---
@@ -98,6 +98,32 @@
 - Next.js 16 uses Turbopack by default (faster than Webpack)
 - React 19 is now stable and fully supported
 - .env files blocked by .gitignore, used terminal commands instead
+
+### Chunk 1.2 - Database Schema & Drizzle ORM ✅
+**Completed:** December 27, 2025  
+**Duration:** ~45 minutes  
+**Key Achievements:**
+- Drizzle ORM 0.45.1 and Drizzle Kit 0.31.8 installed
+- Complete schema for all 6 tables (users, posts, comments, likes, follows, otp_codes)
+- Composite unique constraints on likes (postId+userId) and follows (followerId+followingId)
+- CASCADE deletes configured on all foreign keys
+- Indexes created on username, email, foreign keys, and timestamps
+- Initial migration generated (0000_chunky_tigra.sql)
+- Seed script with sample data (3 users, 5 posts, 4 comments, 8 likes, 4 follows)
+- Database client with singleton pattern
+- Comprehensive db/README.md documentation
+
+**Challenges:**
+- TypeScript strict mode caught undefined array destructuring in seed script
+- Fixed by adding null checks after .returning() calls
+- Drizzle ORM has some internal type errors, resolved with --skipLibCheck
+
+**Learnings:**
+- Drizzle's composite unique constraint syntax: `unique().on(col1, col2)`
+- CASCADE delete syntax: `.references(() => table.id, { onDelete: 'cascade' })`
+- Index naming best practice: explicit names prevent collisions
+- OTP codes must be text (not integer) to preserve leading zeros
+- Boolean defaults critical for security (isAdmin, emailVerified must default false)
 
 ---
 
