@@ -1,0 +1,345 @@
+# .cursorrules
+
+# Instagram Clone - AI Development Rules
+
+> A photo-sharing social platform with Instagram-like mechanics built with Next.js, Drizzle ORM, and Cloudflare R2.
+
+---
+
+## ⚡ QUICK REFERENCE (Read This First!)
+
+### 🔴 Critical Rules (Will Break App If Violated)
+
+| # | Rule | Why |
+|---|------|-----|
+| 1 | Use **Drizzle ORM**, NOT Prisma | TypeScript-native, no codegen, AI-friendly |
+| 5 | **EXACTLY 6 tables** (users, posts, comments, likes, follows, otp_codes) | Architecture constraint |
+| 6 | All images → **3 sizes** (thumb 400px, full 1200px, blur 20px) | Performance requirement |
+| 16 | **JWT in httpOnly cookies**, NOT localStorage | Security requirement |
+| 17 | **All Server Actions MUST check auth** (getCurrentUser()) | Security requirement |
+
+### 🟡 Important Rules (Will Cause Issues Later)
+
+| # | Rule | Impact |
+|---|------|--------|
+| 3 | **Optimistic UI mandatory** (useOptimistic hook) | UX requirement |
+| 7 | **Feed is GLOBAL** (not filtered by follows) | Architecture decision |
+| 8 | **Comments are FLAT** (no nesting) | Data model constraint |
+| 9 | **Username is PERMANENT** | Cannot change after registration |
+| 13 | **Cascade deletes** (post → likes + comments) | Data integrity |
+
+### 🟢 Preferred Patterns (Best Practice)
+
+- Server Components by default (#2)
+- Server Actions over API routes
+- shadcn/ui over component libraries
+- PostgreSQL ILIKE for search (not full-text)
+
+---
+
+## 📚 Documentation Navigation
+
+**Need to find something?**
+
+| Looking for... | Check... |
+|----------------|----------|
+| System design & patterns | `ARCHITECTURE` |
+| Database structure | `DATABASE_SCHEMA` |
+| External API setup | `API_CONTRACTS` |
+| Where to find code patterns | `TASK_ROUTER` |
+| Environment variables | `ENV_SETUP` |
+| Error solutions | `TROUBLESHOOTING` |
+| Getting started | `QUICK_START` |
+| Current module | `Implementation Plan` |
+
+---
+
+## 🛠️ Tech Stack
+
+- **Framework:** Next.js (App Router, React 19)
+- **Language:** TypeScript (strict mode)
+- **Database:** Neon Postgres (serverless)
+- **ORM:** Drizzle ORM
+- **Storage:** Cloudflare R2 (S3-compatible)
+- **Image Processing:** Sharp
+- **Auth:** Custom (bcrypt + jose JWT)
+- **Email:** Resend
+- **Styling:** Tailwind CSS
+- **Components:** shadcn/ui (Radix primitives)
+- **Deployment:** Vercel
+
+---
+
+## 🔴 CRITICAL RULES
+
+### Database & ORM
+
+**#1 - Use Drizzle ORM, NOT Prisma**  
+🔴 **CRITICAL** - AI code generation is more reliable with Drizzle's TypeScript-native schema. No codegen step means faster iterations.
+
+**#5 - Database has EXACTLY 6 tables**  
+🔴 **CRITICAL** - Do not add tables beyond: users, posts, comments, likes, follows, otp_codes. No audit tables, no logging tables. Keep it simple.
+
+### Architecture Patterns
+
+**#2 - Server Components by default**  
+🟢 **PREFERRED** - Only use Client Components when you need interactivity (forms, useOptimistic, event handlers). Server Components reduce bundle size and improve performance.
+
+**#3 - Optimistic UI is MANDATORY for social actions**  
+🟡 **IMPORTANT** - Likes, comments, follows MUST use React 19's `useOptimistic` hook. Immediate UI feedback is critical for perceived performance.
+
+**#4 - Use React 19's `useOptimistic`, NOT custom implementations**  
+🟡 **IMPORTANT** - This project explicitly requires React 19 features. Do not implement manual optimistic UI patterns.
+
+### Image Handling
+
+**#6 - All images go to R2 in 3 sizes**  
+🔴 **CRITICAL** - Every image upload MUST generate: thumbnail (400px), full-size (1200px), and blur placeholder (20px base64). Use Sharp for processing.
+
+**#18 - Profile pictures use same upload pipeline as posts**  
+🟢 **PREFERRED** - No separate upload logic. Profile pictures go through Sharp → R2 pipeline, stored as single URL (no thumbnail needed).
+
+### Feed & Social Features
+
+**#7 - Feed is GLOBAL, not filtered by follows**  
+🟡 **IMPORTANT** - The feed shows ALL posts from ALL users in chronological order. Follow system is for counts only in MVP.
+
+**#8 - Comments are FLAT, not nested**  
+🟡 **IMPORTANT** - No reply threads. All comments at same level, newest first. Master spec explicitly forbids nested replies.
+
+**#20 - Follower/following counts only, NO lists**  
+🟡 **IMPORTANT** - Master spec explicitly excludes clickable follower/following lists. Show counts only. Do not build list views.
+
+### User Management
+
+**#9 - Username is PERMANENT**  
+🟡 **IMPORTANT** - Users cannot change username after registration. Username uniqueness is enforced at database and application level.
+
+**#10 - Email verification blocks posting, not viewing**  
+🟡 **IMPORTANT** - Unverified users can browse feed and profiles but cannot post, like, or comment until OTP verified.
+
+**#11 - No password requirements**  
+🟢 **PREFERRED** - Accept ANY password. Master spec explicitly states no length/complexity requirements. Hash everything with bcrypt cost 12.
+
+**#12 - Caption has NO character limit**  
+🟢 **PREFERRED** - Post captions can be any length. Master spec explicitly states unlimited.
+
+### Data Integrity
+
+**#13 - Post deletion cascades to likes AND comments**  
+🟡 **IMPORTANT** - When post deleted, database MUST cascade delete all associated likes and comments. When user deleted, cascade to ALL their content.
+
+### Admin & Moderation
+
+**#14 - Admin can delete ANYTHING**  
+🟡 **IMPORTANT** - Admin users (isAdmin=true) can delete any post, comment, or user. No restrictions. Show confirmation dialogs.
+
+### Search
+
+**#15 - Search is username-only with ILIKE**  
+🟢 **PREFERRED** - User search uses PostgreSQL ILIKE for case-insensitive partial matching on username field ONLY. Max 10 results. Index on username required.
+
+### Authentication & Security
+
+**#16 - JWT in HTTP-only cookies, NOT localStorage**  
+🔴 **CRITICAL** - Session tokens MUST be httpOnly, secure, sameSite cookies. Never store JWT in localStorage or expose to client JavaScript.
+
+**#17 - All Server Actions MUST revalidate auth**  
+🔴 **CRITICAL** - Every server action that modifies data MUST call getCurrentUser() to verify authentication. Never trust client state.
+
+**#19 - OTP codes expire in 15 minutes**  
+🟡 **IMPORTANT** - Email verification OTPs MUST expire. Check expiration in database before validating. Resend invalidates previous codes.
+
+---
+
+## 🔒 Security Rules
+
+### Secrets & Environment (🔴 CRITICAL)
+
+- **NEVER hardcode** API keys, database URLs, R2 credentials, JWT secrets, or any sensitive values
+- **ALL sensitive values MUST come from** environment variables (.env.local in dev, Vercel env vars in production)
+- **NEVER log secrets** or include them in error messages. Log generic errors only.
+- **NEVER commit .env files** — Only commit .env.example with placeholder values
+- **R2 credentials** (access key ID, secret access key) MUST be server-only. Never expose to client.
+- **JWT secret** MUST be cryptographically random (min 32 bytes) and never exposed
+
+### Input Validation (🟡 IMPORTANT)
+
+- **ALWAYS validate user input on the server**, even if validated on client. Client validation is for UX only.
+- **NEVER trust client-side data** for security decisions. Re-verify everything in Server Actions.
+- **Sanitize** all user input before database queries (Drizzle handles this with parameterized queries)
+- **Validate file uploads:** Check type (image/*), size (max 50MB), and validate with Sharp before storing
+- **Email validation:** Format check before registration and OTP send
+- **Username validation:** Alphanumeric + underscore only, check uniqueness before registration
+- **Minimum comment length:** 1 character (reject empty strings, trim whitespace)
+
+### Authentication & Authorization (🔴 CRITICAL)
+
+- **ALWAYS check authentication** on protected API routes and Server Actions before processing
+- **ALWAYS verify user has permission** before any data operation (check userId matches or isAdmin=true)
+- **Use middleware** for auth checks on route groups, not inline code in every page
+- **Session tokens MUST be** httpOnly, secure (HTTPS only), and sameSite=strict
+- **JWT expiration** is 30 days. Enforce in middleware validation.
+- **Password hashing** with bcrypt cost factor 12 (never lower)
+- **OTP verification** required before user can post, like, or comment
+
+### Data Access (🟡 IMPORTANT)
+
+- **ALWAYS filter queries by userId** for user-specific data (posts, likes, comments, follows) to prevent IDOR
+- **Check ownership before update/delete** — Verify current user owns resource OR is admin
+- **Post deletion** — Only post author or admin can delete
+- **Comment deletion** — Only comment author, post author, or admin can delete
+- **Follow/unfollow** — User cannot follow themselves (check in UI and backend)
+- **No negative counts** — Follower, following, like counts cannot go below zero
+- **Cascade deletes** configured at database level (foreign keys with ON DELETE CASCADE)
+
+### Error Handling (🟢 PREFERRED)
+
+- **NEVER expose stack traces** to users in production. Show generic messages.
+- **Log errors server-side** with context (user ID, action, timestamp), but show generic errors to users
+- **Return consistent error formats** — Do not leak implementation details
+- **Handle all promise rejections** and async errors. Every Server Action needs try-catch.
+- **Network errors** — Show user-friendly messages: "Connection error. Please try again."
+- **Database errors** — Log details, show "Something went wrong. Please try again."
+
+### API Security (🟡 IMPORTANT)
+
+- **Validate R2 uploads** — Check file type and size before processing
+- **Validate email OTP codes** — Check code matches, not expired, and belongs to correct user
+- **Implement rate limiting** on OTP verification (max 5 attempts per 15 minutes)
+- **CSRF protection** — Built into Next.js Server Actions (verify enabled)
+- **Set security headers** — X-Content-Type-Options: nosniff, X-Frame-Options: DENY
+- **R2 bucket** must have public read for images, but upload requires authentication
+- **Email service API keys** server-side only, never exposed to client
+
+---
+
+## 🎯 Technology Choices (Why We Use What We Use)
+
+| Instead of... | We use... | Because... |
+|---------------|-----------|------------|
+| Prisma | **Drizzle ORM** | TypeScript-native schema, no codegen step, better for AI |
+| Browser resize | **Sharp** | Server-side processing ensures consistent quality |
+| AWS S3 | **Cloudflare R2** | Zero egress fees, S3-compatible API |
+| NextAuth/Clerk | **Custom auth** | Learning project, manual implementation required |
+| SendGrid | **Resend** | Simpler API, better DX, sufficient for transactional email |
+| jsonwebtoken | **jose JWT** | Modern, edge-compatible, smaller bundle |
+| argon2 | **bcrypt** | Simpler, widely supported, sufficient for MVP |
+| Chakra/MUI | **shadcn/ui** | Copy-paste components, no runtime dependency |
+| CSS Modules | **Tailwind** | Utility-first, faster iteration, AI-friendly |
+| API routes | **Server Actions** | Collocated with components, simpler architecture |
+| Full-text search | **PostgreSQL ILIKE** | Simpler for username search, sufficient for MVP |
+
+---
+
+## ⚠️ Common Mistakes to Avoid
+
+### Database (🔴 CRITICAL)
+- ❌ Adding "future feature" fields to database schema → Keep minimal
+- ❌ Adding more than 6 database tables → Architecture constraint
+- ❌ Not using indexes on username, email, post.userId → Performance issues
+- ❌ Soft delete → Use hard deletes with cascade
+
+### Security (🔴 CRITICAL)
+- ❌ Using localStorage for JWT tokens → Use HTTP-only cookies
+- ❌ Trusting client-side like/follow state → Always query database
+- ❌ Exposing R2 credentials to client → Server-only
+- ❌ Forgetting to check email verification → Check emailVerified flag
+
+### Architecture (🟡 IMPORTANT)
+- ❌ Implementing nested comment replies → Explicitly forbidden
+- ❌ Building follower/following list pages → Out of scope, counts only
+- ❌ Filtering feed by followed users → Feed is global in MVP
+- ❌ Client-side image resizing → Server-side with Sharp only
+- ❌ Not handling optimistic UI rollback → Must handle failures
+
+### Scope Creep (🟢 WATCH FOR)
+- ❌ Adding hashtag functionality → Out of scope for MVP
+- ❌ Implementing post editing → Out of scope, deletion only
+- ❌ Building stories/reels → Not in spec
+- ❌ Direct messaging → Not in spec
+
+---
+
+## 📁 File Organisation
+
+```
+app/
+├── (auth)/           # Auth routes (login, register)
+├── (main)/           # Protected routes (feed, profile)
+├── admin/            # Admin dashboard
+├── actions/          # Server Actions by feature
+│   ├── auth.ts
+│   ├── posts.ts
+│   ├── comments.ts
+│   └── follows.ts
+├── layout.tsx
+└── page.tsx
+
+src/
+├── components/
+│   ├── ui/           # shadcn components
+│   ├── posts/        # Post components
+│   ├── profile/      # Profile components
+│   └── feed/         # Feed components
+├── db/
+│   ├── schema.ts     # All 6 tables
+│   ├── index.ts      # Database client
+│   └── migrations/   # Generated migrations
+└── lib/
+    ├── auth.ts       # Auth utilities
+    ├── r2.ts         # R2 client
+    ├── image.ts      # Sharp processing
+    └── utils.ts      # Shared utilities
+
+middleware.ts         # Auth route protection
+```
+
+---
+
+## 📦 Dependency Rules
+
+### ❌ DO NOT Install
+- Prisma (use Drizzle)
+- NextAuth/Clerk (custom auth)
+- Redux/Zustand (use React 19 hooks)
+- Other image libraries (use Sharp only)
+
+### ✅ DO Install
+- Only shadcn/ui components actually used
+- Dependencies from approved tech stack
+
+### 📌 Package Manager
+- **Always use `pnpm`** (not npm or yarn)
+- Pin versions in package.json
+
+---
+
+## 🔄 Versioning Rules
+
+### Documentation
+- ✅ Reference features/APIs, not version numbers
+- ✅ `pnpm add [package]` — installs latest
+- ❌ `pnpm add next@14.0.0` — don't pin in docs
+
+### Before Building
+```bash
+pnpm outdated  # Check for stale packages
+pnpm update    # Update to latest compatible
+```
+
+---
+
+## 🎓 Learning Resources
+
+When you encounter unfamiliar patterns:
+
+- **Drizzle ORM:** https://orm.drizzle.team/docs
+- **Next.js App Router:** https://nextjs.org/docs
+- **React 19 useOptimistic:** https://react.dev/reference/react/useOptimistic
+- **Cloudflare R2:** https://developers.cloudflare.com/r2/
+- **Resend:** https://resend.com/docs
+
+---
+
+**Last Updated:** This file reflects the complete Instagram Clone specification as of project initialization.
