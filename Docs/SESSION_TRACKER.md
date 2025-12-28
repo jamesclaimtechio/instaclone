@@ -41,6 +41,18 @@
 **Actual Duration:** ~2.2 hours  
 **Estimated Duration:** 14-18 hours total
 
+### Module 3: Email Service & OTP Verification (1/4 chunks)
+
+| Chunk | Name | Status | Started | Completed | Duration |
+|-------|------|--------|---------|-----------|----------|
+| 3.1 | Email Service Integration | ✅ Complete | Dec 28, 2025 | Dec 28, 2025 | ~25 min |
+| 3.2 | OTP Generation & Storage | ⏳ Not Started | - | - | - |
+| 3.3 | OTP Verification Flow | ⏳ Not Started | - | - | - |
+| 3.4 | Verification UI & Enforcement | ⏳ Not Started | - | - | - |
+
+**Module Status:** 🚧 In Progress (1/4 chunks complete)  
+**Estimated Duration:** 8-12 hours total
+
 ---
 
 ## 📝 Session Log
@@ -90,6 +102,36 @@
 *No blockers at this time*
 
 ---
+
+## ✅ Completed Chunks
+
+### Chunk 3.1 - Email Service Integration ✅
+**Completed:** December 28, 2025  
+**Duration:** ~25 minutes  
+**Key Achievements:**
+- Installed Resend SDK v6.6.0 for email delivery
+- Created lib/email.ts with complete email service
+- Implemented renderOTPEmail() with responsive HTML template
+- Built sendOTPEmail() function with retry logic
+- Exponential backoff retry strategy (1s, 2s, 4s delays)
+- Max 3 retries on 5xx errors, no retry on 4xx
+- Custom error classes (EmailSendError, EmailRateLimitError, EmailInvalidRecipientError)
+- Email logging (recipient and status, no sensitive data)
+- Used Resend test sender (onboarding@resend.dev)
+- Sent test emails successfully - confirmed delivery
+- TypeScript compilation passing
+
+**Challenges:**
+- Resend API response type is union (success | error)
+- Fixed by checking 'error' in result and extracting data.id
+- tsx doesn't auto-load .env.local (used direct env vars for testing)
+
+**Learnings:**
+- Resend test email (onboarding@resend.dev) doesn't require domain verification
+- Email HTML must use inline styles and table-based layout for compatibility
+- OTP code should be 48px font, bold, letter-spaced for readability
+- Retry only on 5xx and network errors, not 4xx (permanent failures)
+- Email service errors shouldn't block registration (return false, don't throw)
 
 ## ✅ Completed Chunks
 

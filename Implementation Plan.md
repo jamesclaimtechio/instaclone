@@ -117,17 +117,17 @@ Total:         [██░░░░░░░░] 15% (2/13 modules)
 
 ---
 
-### ⬜ Module 3: Email Service & OTP Verification
+### 🚧 Module 3: Email Service & OTP Verification
 
 **Duration:** 6-8 hours
 
-**Dependencies:** Module 2 complete
+**Dependencies:** Module 2 complete ✅
 
 **Deliverables:**
 
-- [ ]  Resend API integrated
+- [x]  Resend API integrated
 - [ ]  OTP generation (6-digit, 15-min expiry)
-- [ ]  Email templates (verification)
+- [x]  Email templates (verification)
 - [ ]  OTP validation logic
 - [ ]  Resend OTP functionality
 - [ ]  Unverified user restrictions
