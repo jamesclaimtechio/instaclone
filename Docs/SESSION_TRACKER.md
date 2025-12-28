@@ -6,8 +6,8 @@
 
 ## 📊 Current Status
 
-**Active Module:** Module 8 - Comments System  
-**Active Chunk:** Chunk 8.4 - Comment Moderation & Deletion  
+**Active Module:** Module 9 - Follow System  
+**Active Chunk:** Chunk 9.1 - Follow Data Layer  
 **Status:** ✅ Complete  
 **Started:** December 28, 2025
 
@@ -120,6 +120,18 @@
 **Estimated Duration:** 12-18 hours total
 
 **Note:** Chunk 8.3 was largely implemented during Chunk 8.2. Verification confirmed all requirements met.
+
+### Module 9: Follow System (1/3 chunks)
+
+| Chunk | Name | Status | Started | Completed | Duration |
+|-------|------|--------|---------|-----------|----------|
+| 9.1 | Follow Data Layer | ✅ Complete | Dec 28, 2025 | Dec 28, 2025 | ~15 min |
+| 9.2 | Follow Button UI with Optimistic Updates | ⏳ Pending | - | - | - |
+| 9.3 | Follower Counts & State Persistence | ⏳ Pending | - | - | - |
+
+**Module Status:** 🚧 In Progress (1/3 chunks)  
+**Actual Duration:** ~15 min so far  
+**Estimated Duration:** 6-10 hours total
 
 ---
 
