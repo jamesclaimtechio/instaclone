@@ -85,9 +85,8 @@ export function formatCommentTimestamp(date: Date): string {
 }
 
 /**
- * Gets avatar URL with fallback to DiceBear
+ * Gets avatar URL with fallback to silhouette
+ * Re-exports getAvatarUrl from profile.types for consistency
  */
-export function getCommentAvatarUrl(profilePictureUrl: string | null, username: string): string {
-  return profilePictureUrl || `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(username)}`;
-}
+export { getAvatarUrl as getCommentAvatarUrl } from './profile.types';
 

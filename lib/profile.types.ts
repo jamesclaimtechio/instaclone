@@ -74,15 +74,26 @@ export function isOwnProfile(
 }
 
 /**
+ * Default avatar SVG as a data URL
+ * A simple silhouette icon similar to Instagram's default avatar
+ */
+const DEFAULT_AVATAR_SVG = `data:image/svg+xml,${encodeURIComponent(`
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+  <circle cx="64" cy="64" r="64" fill="#E5E7EB"/>
+  <circle cx="64" cy="48" r="20" fill="#9CA3AF"/>
+  <ellipse cx="64" cy="100" rx="36" ry="28" fill="#9CA3AF"/>
+</svg>
+`)}`;
+
+/**
  * Get a default avatar URL for users without a profile picture
- * Uses DiceBear for consistent, unique avatars
+ * Returns a simple gray silhouette icon
  * 
- * @param username - The user's username for avatar generation
+ * @param _username - The user's username (unused, kept for API compatibility)
  * @returns URL to a default avatar image
  */
-export function getDefaultAvatarUrl(username: string): string {
-  // Using DiceBear's "initials" style for consistent avatars
-  return `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(username)}&backgroundColor=c0aede,d1d4f9,b6e3f4,ffd5dc,ffdfbf`;
+export function getDefaultAvatarUrl(_username: string): string {
+  return DEFAULT_AVATAR_SVG;
 }
 
 /**

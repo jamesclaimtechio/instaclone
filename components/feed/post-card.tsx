@@ -80,7 +80,7 @@ export default function PostCard({ post }: PostCardProps) {
       {/* Actions and Counts */}
       <div className="p-3 space-y-2">
         {/* Action buttons */}
-        <div className="flex items-center gap-4">
+        <div className="flex items-start gap-4">
           <LikeButton 
             postId={id}
             initialLikeCount={likeCount}
