@@ -34,10 +34,10 @@
 | 2.1 | Auth Utilities & JWT Infrastructure | ✅ Complete | Dec 27, 2025 | Dec 27, 2025 | ~35 min |
 | 2.2 | User Registration Flow | ✅ Complete | Dec 27, 2025 | Dec 27, 2025 | ~25 min |
 | 2.3 | Login & Logout Flow | ✅ Complete | Dec 27, 2025 | Dec 27, 2025 | ~20 min |
-| 2.4 | Auth Middleware & Route Protection | ⏳ Not Started | - | - | - |
+| 2.4 | Auth Middleware & Route Protection | ✅ Complete | Dec 27, 2025 | Dec 27, 2025 | ~20 min |
 | 2.5 | Registration & Login UI | ⏳ Not Started | - | - | - |
 
-**Module Status:** 🚧 In Progress (3/5 chunks complete)  
+**Module Status:** 🚧 In Progress (4/5 chunks complete)  
 **Estimated Duration:** 14-18 hours total
 
 ---
@@ -245,6 +245,36 @@
 - Email case-insensitive for login (same as registration)
 - logoutUser() is simple: deleteAuthCookie() + redirect('/login')
 - Fixed dummy password string ensures consistent timing across all failed logins
+
+### Chunk 2.4 - Auth Middleware & Route Protection ✅
+**Completed:** December 27, 2025  
+**Duration:** ~20 minutes  
+**Key Achievements:**
+- Created middleware.ts at project root for request interception
+- JWT verification on every request with comprehensive error handling
+- Protected route configuration (all routes except public ones)
+- Public routes defined: /login, /register, / (homepage)
+- Unauthenticated users redirected to /login with returnUrl preserved
+- Authenticated users redirected away from /login and /register to feed
+- User context injection via request headers (x-user-id, x-user-is-admin)
+- Created getUserFromHeaders() helper for Server Components and Server Actions
+- Middleware matcher configured to exclude static assets for performance
+- Open redirect protection (validates returnUrl is relative path)
+- Test protected route created to verify middleware functionality
+- TypeScript compilation passing
+
+**Challenges:**
+- Next.js middleware requires specific export format (default function + config)
+- Headers must be injected into NextResponse for downstream access
+- Middleware runs on Edge runtime, limited to Edge-compatible APIs only
+
+**Learnings:**
+- middleware.ts MUST be at project root, not in app/ directory
+- Matcher regex excludes static assets: /_next/static, images, favicon
+- Public routes array prevents infinite redirect loops
+- Request headers different from response headers (must set on response)
+- getUserFromHeaders() provides user context without re-verifying JWT
+- Middleware should not make database calls (too slow, runs on every request)
 
 ---
 

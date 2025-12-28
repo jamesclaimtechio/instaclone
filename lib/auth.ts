@@ -216,3 +216,31 @@ export async function getCurrentUser(): Promise<JWTPayload | null> {
   }
 }
 
+/**
+ * Gets user context from request headers (injected by middleware)
+ * Use this in Server Components and Server Actions to get current user
+ * @returns Promise resolving to JWT payload if authenticated, null otherwise
+ */
+export async function getUserFromHeaders(): Promise<JWTPayload | null> {
+  try {
+    const { headers } = await import('next/headers');
+    const headersList = await headers();
+    
+    const userId = headersList.get('x-user-id');
+    const isAdminHeader = headersList.get('x-user-is-admin');
+    
+    if (!userId) {
+      return null;
+    }
+    
+    return {
+      userId,
+      isAdmin: isAdminHeader === 'true',
+      exp: 0, // Not available from headers
+      iat: 0, // Not available from headers
+    };
+  } catch (error) {
+    return null;
+  }
+}
+
