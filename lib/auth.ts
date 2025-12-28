@@ -11,24 +11,31 @@ const TOKEN_EXPIRATION_DAYS = 30;
 const BCRYPT_ROUNDS = 12;
 const COOKIE_NAME = 'auth_token';
 
-// Validate JWT_SECRET on module load
-if (!JWT_SECRET) {
-  throw new Error(
-    'JWT_SECRET is not defined. Please add it to your .env.local file.\n' +
-      'Generate with: openssl rand -hex 32\n' +
-      'Must be at least 64 characters for HS256 security.'
-  );
+// Validate JWT_SECRET (will be checked when functions are actually called)
+function validateJWTSecret(): string {
+  if (!JWT_SECRET) {
+    throw new Error(
+      'JWT_SECRET is not defined. Please add it to your environment variables.\n' +
+        'Generate with: openssl rand -hex 32\n' +
+        'Must be at least 64 characters for HS256 security.'
+    );
+  }
+
+  if (JWT_SECRET.length < 64) {
+    throw new Error(
+      'JWT_SECRET is too short. Must be at least 64 characters.\n' +
+        'Generate a stronger secret with: openssl rand -hex 32'
+    );
+  }
+
+  return JWT_SECRET;
 }
 
-if (JWT_SECRET.length < 64) {
-  throw new Error(
-    'JWT_SECRET is too short. Must be at least 64 characters.\n' +
-      'Generate a stronger secret with: openssl rand -hex 32'
-  );
+// Get JWT secret key (validates on first use, not at module load)
+function getJWTSecretKey(): Uint8Array {
+  const secret = validateJWTSecret();
+  return new TextEncoder().encode(secret);
 }
-
-// Convert JWT_SECRET to Uint8Array for jose
-const JWT_SECRET_KEY = new TextEncoder().encode(JWT_SECRET);
 
 // ============================================================================
 // TYPES
@@ -109,7 +116,7 @@ export async function generateToken(
     .setProtectedHeader({ alg: 'HS256' })
     .setIssuedAt(iat)
     .setExpirationTime(exp)
-    .sign(JWT_SECRET_KEY);
+    .sign(getJWTSecretKey());
 
   return token;
 }
@@ -123,7 +130,7 @@ export async function generateToken(
  */
 export async function verifyToken(token: string): Promise<JWTPayload> {
   try {
-    const { payload } = await jwtVerify(token, JWT_SECRET_KEY, {
+    const { payload } = await jwtVerify(token, getJWTSecretKey(), {
       algorithms: ['HS256'],
     });
 
