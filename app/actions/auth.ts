@@ -184,8 +184,8 @@ export async function registerUser(
       // User can request resend if email fails
       await sendOTPToUser(newUser.id, newUser.email, newUser.username);
 
-      // Redirect to feed after successful registration
-      redirect('/');
+      // Redirect to verification page after successful registration
+      redirect('/verify');
     } catch (insertError: any) {
       // Handle race condition: unique constraint violation
       if (insertError.code === '23505') {

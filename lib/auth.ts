@@ -251,3 +251,31 @@ export async function getUserFromHeaders(): Promise<JWTPayload | null> {
   }
 }
 
+/**
+ * Checks if current user has verified their email
+ * Throws error with message if not verified
+ * Use in Server Actions that require verification (posts, likes, comments)
+ */
+export async function requireEmailVerification(): Promise<void> {
+  const currentUser = await getCurrentUser();
+  
+  if (!currentUser) {
+    throw new Error('You must be logged in');
+  }
+
+  const { db, users } = await import('@/db');
+  const { eq } = await import('drizzle-orm');
+  
+  const user = await db.query.users.findFirst({
+    where: eq(users.id, currentUser.userId),
+  });
+
+  if (!user) {
+    throw new Error('User not found');
+  }
+
+  if (!user.emailVerified) {
+    throw new Error('Please verify your email to use this feature');
+  }
+}
+
