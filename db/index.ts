@@ -1,3 +1,7 @@
+// Load environment variables for scripts (Next.js handles this automatically in app context)
+import * as dotenv from 'dotenv';
+dotenv.config({ path: '.env.local' });
+
 import { drizzle } from 'drizzle-orm/neon-http';
 import { neon } from '@neondatabase/serverless';
 import * as schema from './schema';
