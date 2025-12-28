@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono, Lobster_Two } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
 import { getCurrentUser } from "@/lib/auth";
@@ -18,9 +18,56 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const lobsterTwo = Lobster_Two({
+  weight: "700",
+  subsets: ["latin"],
+  variable: "--font-lobster-two",
+  display: "swap",
+});
+
 export const metadata: Metadata = {
   title: "InstaClone",
   description: "Share your moments with the world",
+  manifest: "/site.webmanifest",
+  icons: {
+    icon: [
+      { url: "/favicon.ico", sizes: "32x32" },
+      { url: "/favicon-16x16.png", sizes: "16x16", type: "image/png" },
+      { url: "/favicon-32x32.png", sizes: "32x32", type: "image/png" },
+    ],
+    apple: [
+      { url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
+    ],
+    other: [
+      {
+        rel: "android-chrome-192x192",
+        url: "/android-chrome-192x192.png",
+      },
+      {
+        rel: "android-chrome-512x512",
+        url: "/android-chrome-512x512.png",
+      },
+    ],
+  },
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "InstaClone",
+  },
+  formatDetection: {
+    telephone: false,
+  },
+  openGraph: {
+    type: "website",
+    siteName: "InstaClone",
+    title: "InstaClone",
+    description: "Share your moments with the world",
+  },
+  twitter: {
+    card: "summary",
+    title: "InstaClone",
+    description: "Share your moments with the world",
+  },
 };
 
 export default async function RootLayout({
@@ -55,7 +102,7 @@ export default async function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} ${lobsterTwo.variable} antialiased`}
       >
         {showVerificationBanner && <VerificationBanner />}
         <NavWrapper username={username} />

@@ -2,12 +2,94 @@
 
 import { useState, useEffect, FormEvent, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import Link from 'next/link';
 import { loginUser } from '@/app/actions/auth';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Eye, EyeOff, Loader2, AlertCircle } from 'lucide-react';
+import { Eye, EyeOff, Loader2 } from 'lucide-react';
+
+// ============================================================================
+// INSTAGRAM-STYLE INPUT COMPONENT
+// ============================================================================
+
+interface InstagramInputProps {
+  id: string;
+  name: string;
+  type: string;
+  placeholder: string;
+  value: string;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  disabled?: boolean;
+  required?: boolean;
+  autoComplete?: string;
+  inputMode?: 'email' | 'text' | 'tel' | 'url' | 'search' | 'none' | 'numeric' | 'decimal';
+  className?: string;
+  rightElement?: React.ReactNode;
+}
+
+function InstagramInput({
+  id,
+  name,
+  type,
+  placeholder,
+  value,
+  onChange,
+  disabled = false,
+  required = false,
+  autoComplete,
+  inputMode,
+  className = '',
+  rightElement,
+}: InstagramInputProps) {
+  const [isFocused, setIsFocused] = useState(false);
+  const hasValue = value.length > 0;
+
+  return (
+    <div className={`relative ${className}`}>
+      <input
+        id={id}
+        name={name}
+        type={type}
+        value={value}
+        onChange={onChange}
+        onFocus={() => setIsFocused(true)}
+        onBlur={() => setIsFocused(false)}
+        disabled={disabled}
+        required={required}
+        autoComplete={autoComplete}
+        inputMode={inputMode}
+        className={`
+          w-full bg-zinc-900 border border-zinc-700 rounded-sm
+          px-3 pt-4 pb-1 text-sm text-white
+          placeholder-transparent
+          focus:outline-none focus:border-zinc-500
+          disabled:opacity-50 disabled:cursor-not-allowed
+          transition-colors
+          ${rightElement ? 'pr-12' : ''}
+        `}
+        placeholder={placeholder}
+      />
+      <label
+        htmlFor={id}
+        className={`
+          absolute left-3 transition-all duration-200 pointer-events-none
+          ${isFocused || hasValue
+            ? 'top-1 text-[10px] text-zinc-400'
+            : 'top-1/2 -translate-y-1/2 text-xs text-zinc-400'
+          }
+        `}
+      >
+        {placeholder}
+      </label>
+      {rightElement && (
+        <div className="absolute right-3 top-1/2 -translate-y-1/2">
+          {rightElement}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ============================================================================
+// LOGIN FORM INNER
+// ============================================================================
 
 function LoginFormInner() {
   const router = useRouter();
@@ -47,21 +129,18 @@ function LoginFormInner() {
       const result = await loginUser(formData);
 
       if (result.success) {
-        // Success - redirect to returnUrl or feed
-        // Server Action will handle redirect, but we can also do it client-side
         if (returnUrl && returnUrl.startsWith('/')) {
           router.push(returnUrl);
         } else {
           router.push(result.redirect);
         }
       } else {
-        // Show error
         setError(result.error.message);
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       // NEXT_REDIRECT is thrown by redirect() in Server Actions - let it propagate
-      if (error?.message?.includes('NEXT_REDIRECT') || error?.digest?.includes('NEXT_REDIRECT')) {
-        throw error; // Let Next.js handle the redirect
+      if (error instanceof Error && (error.message?.includes('NEXT_REDIRECT') || (error as Error & { digest?: string }).digest?.includes('NEXT_REDIRECT'))) {
+        throw error;
       }
       
       console.error('Login error:', error);
@@ -71,96 +150,101 @@ function LoginFormInner() {
     }
   }
 
+  // Check if form is valid
+  const isFormValid = email.length > 0 && password.length > 0;
+
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      {/* General Error */}
+    <form onSubmit={handleSubmit} className="space-y-2">
+      {/* Error Message */}
       {error && (
-        <div className="flex items-center gap-2 p-3 rounded-lg bg-red-50 text-red-900" role="alert">
-          <AlertCircle className="h-4 w-4 flex-shrink-0" />
-          <p className="text-sm">{error}</p>
+        <div className="p-3 rounded bg-red-900/30 border border-red-800 text-red-400 text-sm text-center">
+          {error}
         </div>
       )}
 
       {/* Email Field */}
-      <div className="space-y-2">
-        <Label htmlFor="email">
-          Email <span className="text-red-500">*</span>
-        </Label>
-        <Input
-          id="email"
-          name="email"
-          type="email"
-          inputMode="email"
-          autoComplete="email"
-          placeholder="you@example.com"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          disabled={isLoading}
-          required
-          aria-required="true"
-          aria-invalid={!!error}
-        />
-      </div>
+      <InstagramInput
+        id="email"
+        name="email"
+        type="email"
+        placeholder="Phone number, username or email address"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        disabled={isLoading}
+        required
+        autoComplete="email"
+        inputMode="email"
+      />
 
       {/* Password Field */}
-      <div className="space-y-2">
-        <Label htmlFor="password">
-          Password <span className="text-red-500">*</span>
-        </Label>
-        <div className="relative">
-          <Input
-            id="password"
-            name="password"
-            type={showPassword ? 'text' : 'password'}
-            autoComplete="current-password"
-            placeholder="Enter your password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            disabled={isLoading}
-            required
-            aria-required="true"
-            aria-invalid={!!error}
-            className="pr-10"
-          />
-          <button
-            type="button"
-            onClick={() => setShowPassword(!showPassword)}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
-            aria-label={showPassword ? 'Hide password' : 'Show password'}
-            tabIndex={-1}
-          >
-            {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-          </button>
-        </div>
-      </div>
+      <InstagramInput
+        id="password"
+        name="password"
+        type={showPassword ? 'text' : 'password'}
+        placeholder="Password"
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+        disabled={isLoading}
+        required
+        autoComplete="current-password"
+        rightElement={
+          password.length > 0 && (
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="text-sm font-semibold text-white hover:text-zinc-300 transition-colors"
+              tabIndex={-1}
+            >
+              {showPassword ? 'Hide' : 'Show'}
+            </button>
+          )
+        }
+      />
 
       {/* Submit Button */}
-      <Button 
+      <button 
         type="submit" 
-        className="w-full"
-        disabled={isLoading}
+        className={`
+          w-full py-2 mt-4 rounded-lg font-semibold text-sm
+          transition-all duration-200
+          ${isFormValid && !isLoading
+            ? 'bg-[#0095F6] hover:bg-[#1877F2] text-white cursor-pointer'
+            : 'bg-[#0095F6]/40 text-white/50 cursor-not-allowed'
+          }
+        `}
+        disabled={isLoading || !isFormValid}
         aria-live="polite"
       >
         {isLoading ? (
-          <>
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+          <span className="flex items-center justify-center gap-2">
+            <Loader2 className="h-4 w-4 animate-spin" />
             Logging in...
-          </>
+          </span>
         ) : (
-          'Login'
+          'Log in'
         )}
-      </Button>
-
-      {/* Navigation Link */}
-      <p className="text-center text-sm text-gray-600">
-        Don't have an account?{' '}
-        <Link href="/register" className="text-primary hover:underline font-medium">
-          Register
-        </Link>
-      </p>
+      </button>
     </form>
   );
 }
+
+// ============================================================================
+// SKELETON
+// ============================================================================
+
+function LoginFormSkeleton() {
+  return (
+    <div className="space-y-2">
+      <div className="h-11 w-full bg-zinc-800 rounded-sm animate-pulse" />
+      <div className="h-11 w-full bg-zinc-800 rounded-sm animate-pulse" />
+      <div className="h-10 w-full bg-zinc-800 rounded-lg animate-pulse mt-4" />
+    </div>
+  );
+}
+
+// ============================================================================
+// EXPORT
+// ============================================================================
 
 export default function LoginForm() {
   return (
@@ -169,20 +253,3 @@ export default function LoginForm() {
     </Suspense>
   );
 }
-
-function LoginFormSkeleton() {
-  return (
-    <div className="space-y-4">
-      <div className="space-y-2">
-        <div className="h-4 w-16 bg-gray-200 rounded animate-pulse" />
-        <div className="h-10 w-full bg-gray-200 rounded animate-pulse" />
-      </div>
-      <div className="space-y-2">
-        <div className="h-4 w-20 bg-gray-200 rounded animate-pulse" />
-        <div className="h-10 w-full bg-gray-200 rounded animate-pulse" />
-      </div>
-      <div className="h-10 w-full bg-gray-200 rounded animate-pulse" />
-    </div>
-  );
-}
-

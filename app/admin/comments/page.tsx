@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { ExternalLink } from 'lucide-react';
 import { getAllComments, type AdminComment } from '@/lib/admin';
 import AdminPagination from '@/components/admin/pagination';
+import DeleteCommentButton from '@/components/admin/delete-comment-button';
 
 // ============================================================================
 // METADATA
@@ -92,6 +93,9 @@ export default async function AdminCommentsPage({ searchParams }: PageProps) {
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Date
                     </th>
+                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Actions
+                    </th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200">
@@ -173,6 +177,11 @@ function CommentRow({ comment }: { comment: AdminComment }) {
       <td className="px-6 py-4 whitespace-nowrap text-gray-500">
         {formatDate(comment.createdAt)}
       </td>
+
+      {/* Actions */}
+      <td className="px-6 py-4 whitespace-nowrap text-right">
+        <DeleteCommentButton commentId={comment.id} />
+      </td>
     </tr>
   );
 }
@@ -187,7 +196,10 @@ function CommentCard({ comment }: { comment: AdminComment }) {
         >
           {comment.author.username}
         </Link>
-        <span className="text-xs text-gray-500">{formatDate(comment.createdAt)}</span>
+        <div className="flex items-center gap-2">
+          <span className="text-xs text-gray-500">{formatDate(comment.createdAt)}</span>
+          <DeleteCommentButton commentId={comment.id} />
+        </div>
       </div>
       <p className="text-sm text-gray-600 mt-2">
         {truncateText(comment.text, 120)}

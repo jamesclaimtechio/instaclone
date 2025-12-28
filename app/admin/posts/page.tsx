@@ -3,6 +3,7 @@ import Image from 'next/image';
 import { Heart, MessageCircle } from 'lucide-react';
 import { getAllPosts, type AdminPost } from '@/lib/admin';
 import AdminPagination from '@/components/admin/pagination';
+import DeletePostButton from '@/components/admin/delete-post-button';
 
 // ============================================================================
 // METADATA
@@ -90,6 +91,9 @@ export default async function AdminPostsPage({ searchParams }: PageProps) {
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Date
+                    </th>
+                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Actions
                     </th>
                   </tr>
                 </thead>
@@ -184,6 +188,11 @@ function PostRow({ post }: { post: AdminPost }) {
       <td className="px-6 py-4 whitespace-nowrap text-gray-500">
         {formatDate(post.createdAt)}
       </td>
+
+      {/* Actions */}
+      <td className="px-6 py-4 whitespace-nowrap text-right">
+        <DeletePostButton postId={post.id} />
+      </td>
     </tr>
   );
 }
@@ -202,12 +211,15 @@ function PostCard({ post }: { post: AdminPost }) {
           />
         </Link>
         <div className="flex-1 min-w-0">
-          <Link
-            href={`/profile/${post.author.username}`}
-            className="font-medium text-gray-900 hover:underline"
-          >
-            {post.author.username}
-          </Link>
+          <div className="flex items-start justify-between">
+            <Link
+              href={`/profile/${post.author.username}`}
+              className="font-medium text-gray-900 hover:underline"
+            >
+              {post.author.username}
+            </Link>
+            <DeletePostButton postId={post.id} />
+          </div>
           <p className="text-sm text-gray-500 line-clamp-2 mt-1">
             {truncateCaption(post.caption, 80)}
           </p>

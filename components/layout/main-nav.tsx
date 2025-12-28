@@ -58,7 +58,7 @@ export default function MainNav({ username }: MainNavProps) {
           {/* Logo - Desktop only */}
           <Link 
             href="/" 
-            className="hidden md:block text-xl font-bold bg-gradient-to-r from-purple-600 via-pink-500 to-orange-400 bg-clip-text text-transparent"
+            className="hidden md:block text-3xl font-bold bg-gradient-to-r from-purple-600 via-pink-500 to-orange-400 bg-clip-text text-transparent font-instagram"
           >
             InstaClone
           </Link>

@@ -18,9 +18,12 @@ export const metadata = {
 // FEED DATA FETCHER
 // ============================================================================
 
-async function FeedData() {
-  // Fetch initial posts
-  const { posts, hasMore, nextCursor } = await getFeedPosts({ limit: 25 });
+async function FeedData({ currentUserId }: { currentUserId?: string }) {
+  // Fetch initial posts with user's like status
+  const { posts, hasMore, nextCursor } = await getFeedPosts({ 
+    limit: 25,
+    currentUserId,
+  });
 
   return (
     <Feed
@@ -48,14 +51,14 @@ export default async function HomePage() {
       <div className="max-w-lg mx-auto px-4 py-6">
         {/* Header */}
         <header className="mb-6">
-          <h1 className="text-2xl font-bold bg-gradient-to-r from-purple-600 via-pink-500 to-orange-400 bg-clip-text text-transparent">
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 via-pink-500 to-orange-400 bg-clip-text text-transparent font-instagram">
             InstaClone
           </h1>
         </header>
 
         {/* Feed with suspense boundary */}
         <Suspense fallback={<PostSkeletonList count={3} />}>
-          <FeedData />
+          <FeedData currentUserId={user.userId} />
         </Suspense>
       </div>
     </div>

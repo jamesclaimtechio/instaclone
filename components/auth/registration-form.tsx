@@ -2,12 +2,116 @@
 
 import { useState, useEffect, FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';
 import { registerUser } from '@/app/actions/auth';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Eye, EyeOff, Loader2, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { Eye, EyeOff, Loader2, Check, X } from 'lucide-react';
+
+// ============================================================================
+// INSTAGRAM-STYLE INPUT COMPONENT
+// ============================================================================
+
+interface InstagramInputProps {
+  id: string;
+  name: string;
+  type: string;
+  placeholder: string;
+  value: string;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  disabled?: boolean;
+  required?: boolean;
+  autoComplete?: string;
+  autoCapitalize?: string;
+  inputMode?: 'email' | 'text' | 'tel' | 'url' | 'search' | 'none' | 'numeric' | 'decimal';
+  className?: string;
+  rightElement?: React.ReactNode;
+  hasError?: boolean;
+  isValid?: boolean;
+}
+
+function InstagramInput({
+  id,
+  name,
+  type,
+  placeholder,
+  value,
+  onChange,
+  disabled = false,
+  required = false,
+  autoComplete,
+  autoCapitalize,
+  inputMode,
+  className = '',
+  rightElement,
+  hasError = false,
+  isValid = false,
+}: InstagramInputProps) {
+  const [isFocused, setIsFocused] = useState(false);
+  const hasValue = value.length > 0;
+
+  // Determine border color
+  let borderClass = 'border-zinc-700 focus:border-zinc-500';
+  if (hasError) {
+    borderClass = 'border-red-500';
+  } else if (isValid && hasValue) {
+    borderClass = 'border-zinc-700';
+  }
+
+  return (
+    <div className={`relative ${className}`}>
+      <input
+        id={id}
+        name={name}
+        type={type}
+        value={value}
+        onChange={onChange}
+        onFocus={() => setIsFocused(true)}
+        onBlur={() => setIsFocused(false)}
+        disabled={disabled}
+        required={required}
+        autoComplete={autoComplete}
+        autoCapitalize={autoCapitalize}
+        inputMode={inputMode}
+        className={`
+          w-full bg-zinc-900 border rounded-sm
+          px-3 pt-4 pb-1 text-sm text-white
+          placeholder-transparent
+          focus:outline-none
+          disabled:opacity-50 disabled:cursor-not-allowed
+          transition-colors
+          ${borderClass}
+          ${rightElement ? 'pr-16' : ''}
+        `}
+        placeholder={placeholder}
+      />
+      <label
+        htmlFor={id}
+        className={`
+          absolute left-3 transition-all duration-200 pointer-events-none
+          ${isFocused || hasValue
+            ? 'top-1 text-[10px] text-zinc-400'
+            : 'top-1/2 -translate-y-1/2 text-xs text-zinc-400'
+          }
+        `}
+      >
+        {placeholder}
+      </label>
+      {/* Right side elements */}
+      <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-2">
+        {/* Validation icon */}
+        {hasValue && !hasError && isValid && (
+          <Check className="h-5 w-5 text-zinc-500" />
+        )}
+        {hasValue && hasError && (
+          <X className="h-5 w-5 text-red-500" />
+        )}
+        {rightElement}
+      </div>
+    </div>
+  );
+}
+
+// ============================================================================
+// REGISTRATION FORM
+// ============================================================================
 
 export default function RegistrationForm() {
   const router = useRouter();
@@ -50,9 +154,6 @@ export default function RegistrationForm() {
     // Debounce server-side uniqueness check
     setUsernameValidation('checking');
     const timer = setTimeout(async () => {
-      // For MVP, we skip the real-time uniqueness check API call
-      // Uniqueness will be checked on form submission
-      // This just validates the format
       setUsernameValidation('valid');
       setUsernameError('');
     }, 500);
@@ -82,7 +183,6 @@ export default function RegistrationForm() {
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     
-    // Clear previous errors
     setErrors(null);
     setIsLoading(true);
 
@@ -95,17 +195,14 @@ export default function RegistrationForm() {
       const result = await registerUser(formData);
 
       if (result.success) {
-        // Success - Server Action will redirect
-        // This code won't execute due to redirect
         router.push(result.redirect);
       } else {
-        // Show error
         setErrors(result.error);
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       // NEXT_REDIRECT is thrown by redirect() in Server Actions - let it propagate
-      if (error?.message?.includes('NEXT_REDIRECT') || error?.digest?.includes('NEXT_REDIRECT')) {
-        throw error; // Let Next.js handle the redirect
+      if (error instanceof Error && (error.message?.includes('NEXT_REDIRECT') || (error as Error & { digest?: string }).digest?.includes('NEXT_REDIRECT'))) {
+        throw error;
       }
       
       console.error('Registration error:', error);
@@ -118,154 +215,121 @@ export default function RegistrationForm() {
     }
   }
 
+  // Check if form is valid
+  const isFormValid = 
+    email.length > 0 && 
+    username.length > 0 && 
+    password.length > 0 && 
+    usernameValidation !== 'invalid' &&
+    usernameValidation !== 'checking';
+
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit} className="space-y-2">
       {/* General Error */}
       {errors?.field === 'general' && (
-        <div className="flex items-center gap-2 p-3 rounded-lg bg-red-50 text-red-900" role="alert">
-          <AlertCircle className="h-4 w-4 flex-shrink-0" />
-          <p className="text-sm">{errors.message}</p>
+        <div className="p-3 rounded bg-red-900/30 border border-red-800 text-red-400 text-sm text-center">
+          {errors.message}
         </div>
       )}
 
       {/* Email Field */}
-      <div className="space-y-2">
-        <Label htmlFor="email">
-          Email <span className="text-red-500">*</span>
-        </Label>
-        <Input
-          id="email"
-          name="email"
-          type="email"
-          inputMode="email"
-          autoComplete="email"
-          placeholder="you@example.com"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          disabled={isLoading}
-          required
-          aria-required="true"
-          aria-invalid={errors?.field === 'email'}
-          aria-describedby={errors?.field === 'email' ? 'email-error' : undefined}
-          className={errors?.field === 'email' ? 'border-red-500' : ''}
-        />
-        {errors?.field === 'email' && (
-          <p id="email-error" className="text-sm text-red-600 flex items-center gap-1" role="alert">
-            <AlertCircle className="h-3 w-3" />
-            {errors.message}
-          </p>
-        )}
-      </div>
+      <InstagramInput
+        id="email"
+        name="email"
+        type="email"
+        placeholder="Email address"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        disabled={isLoading}
+        required
+        autoComplete="email"
+        inputMode="email"
+        hasError={errors?.field === 'email'}
+        isValid={email.length > 0 && !errors}
+      />
+      {errors?.field === 'email' && (
+        <p className="text-xs text-red-400 px-1">{errors.message}</p>
+      )}
 
       {/* Username Field */}
-      <div className="space-y-2">
-        <Label htmlFor="username">
-          Username <span className="text-red-500">*</span>
-        </Label>
-        <div className="relative">
-          <Input
-            id="username"
-            name="username"
-            type="text"
-            autoComplete="username"
-            autoCapitalize="none"
-            placeholder="john_doe"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            disabled={isLoading}
-            required
-            aria-required="true"
-            aria-invalid={errors?.field === 'username' || usernameValidation === 'invalid'}
-            aria-describedby={errors?.field === 'username' ? 'username-error' : usernameError ? 'username-validation' : undefined}
-            className={errors?.field === 'username' || usernameValidation === 'invalid' ? 'border-red-500' : usernameValidation === 'valid' ? 'border-green-500' : ''}
-          />
-          {/* Validation Icon */}
-          {usernameValidation === 'checking' && (
-            <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 animate-spin text-gray-400" />
-          )}
-          {usernameValidation === 'valid' && !errors && (
-            <CheckCircle2 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-green-600" />
-          )}
-        </div>
-        {usernameValidation === 'invalid' && usernameError && (
-          <p id="username-validation" className="text-sm text-red-600 flex items-center gap-1" role="alert">
-            <AlertCircle className="h-3 w-3" />
-            {usernameError}
-          </p>
-        )}
-        {errors?.field === 'username' && (
-          <p id="username-error" className="text-sm text-red-600 flex items-center gap-1" role="alert">
-            <AlertCircle className="h-3 w-3" />
-            {errors.message}
-          </p>
-        )}
-      </div>
+      <InstagramInput
+        id="username"
+        name="username"
+        type="text"
+        placeholder="Username"
+        value={username}
+        onChange={(e) => setUsername(e.target.value)}
+        disabled={isLoading}
+        required
+        autoComplete="username"
+        autoCapitalize="none"
+        hasError={errors?.field === 'username' || usernameValidation === 'invalid'}
+        isValid={usernameValidation === 'valid'}
+        rightElement={
+          usernameValidation === 'checking' && (
+            <Loader2 className="h-4 w-4 animate-spin text-zinc-400" />
+          )
+        }
+      />
+      {(errors?.field === 'username' || usernameValidation === 'invalid') && (
+        <p className="text-xs text-red-400 px-1">
+          {errors?.field === 'username' ? errors.message : usernameError}
+        </p>
+      )}
 
       {/* Password Field */}
-      <div className="space-y-2">
-        <Label htmlFor="password">
-          Password <span className="text-red-500">*</span>
-        </Label>
-        <div className="relative">
-          <Input
-            id="password"
-            name="password"
-            type={showPassword ? 'text' : 'password'}
-            autoComplete="new-password"
-            placeholder="Enter your password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            disabled={isLoading}
-            required
-            aria-required="true"
-            aria-invalid={errors?.field === 'password'}
-            aria-describedby={errors?.field === 'password' ? 'password-error' : undefined}
-            className={errors?.field === 'password' ? 'border-red-500 pr-10' : 'pr-10'}
-          />
-          <button
-            type="button"
-            onClick={() => setShowPassword(!showPassword)}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
-            aria-label={showPassword ? 'Hide password' : 'Show password'}
-            tabIndex={-1}
-          >
-            {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-          </button>
-        </div>
-        {errors?.field === 'password' && (
-          <p id="password-error" className="text-sm text-red-600 flex items-center gap-1" role="alert">
-            <AlertCircle className="h-3 w-3" />
-            {errors.message}
-          </p>
-        )}
-        <p className="text-xs text-gray-500">No restrictions - any password is accepted</p>
-      </div>
+      <InstagramInput
+        id="password"
+        name="password"
+        type={showPassword ? 'text' : 'password'}
+        placeholder="Password"
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+        disabled={isLoading}
+        required
+        autoComplete="new-password"
+        hasError={errors?.field === 'password'}
+        isValid={password.length > 0 && !errors}
+        rightElement={
+          password.length > 0 && (
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="text-sm font-semibold text-white hover:text-zinc-300 transition-colors"
+              tabIndex={-1}
+            >
+              {showPassword ? 'Hide' : 'Show'}
+            </button>
+          )
+        }
+      />
+      {errors?.field === 'password' && (
+        <p className="text-xs text-red-400 px-1">{errors.message}</p>
+      )}
 
       {/* Submit Button */}
-      <Button 
+      <button 
         type="submit" 
-        className="w-full"
-        disabled={isLoading || usernameValidation === 'checking'}
+        className={`
+          w-full py-2 mt-4 rounded-lg font-semibold text-sm
+          transition-all duration-200
+          ${isFormValid && !isLoading
+            ? 'bg-[#0095F6] hover:bg-[#1877F2] text-white cursor-pointer'
+            : 'bg-[#0095F6]/40 text-white/50 cursor-not-allowed'
+          }
+        `}
+        disabled={isLoading || !isFormValid}
         aria-live="polite"
       >
         {isLoading ? (
-          <>
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+          <span className="flex items-center justify-center gap-2">
+            <Loader2 className="h-4 w-4 animate-spin" />
             Creating account...
-          </>
+          </span>
         ) : (
-          'Create account'
+          'Sign up'
         )}
-      </Button>
-
-      {/* Navigation Link */}
-      <p className="text-center text-sm text-gray-600">
-        Already have an account?{' '}
-        <Link href="/login" className="text-primary hover:underline font-medium">
-          Login
-        </Link>
-      </p>
+      </button>
     </form>
   );
 }
-

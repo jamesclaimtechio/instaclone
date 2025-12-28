@@ -62,6 +62,17 @@ export interface PaginatedResult<T> {
   currentPage: number;
 }
 
+export interface UserCascadeStats {
+  postCount: number;
+  commentCount: number;
+  likeCount: number;
+}
+
+export interface PostCascadeStats {
+  likeCount: number;
+  commentCount: number;
+}
+
 // ============================================================================
 // QUERY FUNCTIONS
 // ============================================================================
@@ -272,6 +283,61 @@ export async function getAllComments(
       totalCount: 0,
       totalPages: 0,
       currentPage: page,
+    };
+  }
+}
+
+// ============================================================================
+// CASCADE STATS QUERIES (for delete confirmation)
+// ============================================================================
+
+/**
+ * Get cascade stats for a user before deletion
+ * Shows how many posts, comments, and likes will be deleted
+ */
+export async function getUserCascadeStats(userId: string): Promise<UserCascadeStats> {
+  try {
+    const [postResult, commentResult, likeResult] = await Promise.all([
+      db.select({ count: count() }).from(posts).where(eq(posts.userId, userId)),
+      db.select({ count: count() }).from(comments).where(eq(comments.userId, userId)),
+      db.select({ count: count() }).from(likes).where(eq(likes.userId, userId)),
+    ]);
+
+    return {
+      postCount: postResult[0]?.count ?? 0,
+      commentCount: commentResult[0]?.count ?? 0,
+      likeCount: likeResult[0]?.count ?? 0,
+    };
+  } catch (error) {
+    console.error('[getUserCascadeStats] Error:', error);
+    return {
+      postCount: 0,
+      commentCount: 0,
+      likeCount: 0,
+    };
+  }
+}
+
+/**
+ * Get cascade stats for a post before deletion
+ * Shows how many likes and comments will be deleted
+ */
+export async function getPostCascadeStats(postId: string): Promise<PostCascadeStats> {
+  try {
+    const [likeResult, commentResult] = await Promise.all([
+      db.select({ count: count() }).from(likes).where(eq(likes.postId, postId)),
+      db.select({ count: count() }).from(comments).where(eq(comments.postId, postId)),
+    ]);
+
+    return {
+      likeCount: likeResult[0]?.count ?? 0,
+      commentCount: commentResult[0]?.count ?? 0,
+    };
+  } catch (error) {
+    console.error('[getPostCascadeStats] Error:', error);
+    return {
+      likeCount: 0,
+      commentCount: 0,
     };
   }
 }

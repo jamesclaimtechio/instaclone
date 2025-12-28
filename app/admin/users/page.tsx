@@ -4,6 +4,7 @@ import { Shield, CheckCircle } from 'lucide-react';
 import { getAllUsers, type AdminUser } from '@/lib/admin';
 import { getAvatarUrl } from '@/lib/profile.types';
 import AdminPagination from '@/components/admin/pagination';
+import DeleteUserButton from '@/components/admin/delete-user-button';
 
 // ============================================================================
 // METADATA
@@ -82,6 +83,9 @@ export default async function AdminUsersPage({ searchParams }: PageProps) {
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Joined
+                    </th>
+                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Actions
                     </th>
                   </tr>
                 </thead>
@@ -178,6 +182,11 @@ function UserRow({ user }: { user: AdminUser }) {
       <td className="px-6 py-4 whitespace-nowrap text-gray-500">
         {formatDate(user.createdAt)}
       </td>
+
+      {/* Actions */}
+      <td className="px-6 py-4 whitespace-nowrap text-right">
+        <DeleteUserButton userId={user.id} username={user.username} />
+      </td>
     </tr>
   );
 }
@@ -187,25 +196,29 @@ function UserCard({ user }: { user: AdminUser }) {
 
   return (
     <div className="p-4">
-      <Link
-        href={`/profile/${user.username}`}
-        className="flex items-start gap-3"
-      >
-        <Image
-          src={avatarUrl}
-          alt={user.username}
-          width={48}
-          height={48}
-          className="rounded-full object-cover"
-        />
+      <div className="flex items-start gap-3">
+        <Link href={`/profile/${user.username}`}>
+          <Image
+            src={avatarUrl}
+            alt={user.username}
+            width={48}
+            height={48}
+            className="rounded-full object-cover"
+          />
+        </Link>
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2">
-            <p className="font-medium text-gray-900 truncate">{user.username}</p>
-            {user.isAdmin && (
-              <span className="inline-flex items-center gap-1 text-xs text-red-600">
-                <Shield className="h-3 w-3" />
-              </span>
-            )}
+          <div className="flex items-center justify-between">
+            <Link href={`/profile/${user.username}`}>
+              <div className="flex items-center gap-2">
+                <p className="font-medium text-gray-900 truncate">{user.username}</p>
+                {user.isAdmin && (
+                  <span className="inline-flex items-center gap-1 text-xs text-red-600">
+                    <Shield className="h-3 w-3" />
+                  </span>
+                )}
+              </div>
+            </Link>
+            <DeleteUserButton userId={user.id} username={user.username} />
           </div>
           <p className="text-sm text-gray-500 truncate">{user.email}</p>
           <div className="flex items-center gap-3 mt-1 text-xs text-gray-500">
@@ -217,7 +230,7 @@ function UserCard({ user }: { user: AdminUser }) {
             )}
           </div>
         </div>
-      </Link>
+      </div>
     </div>
   );
 }
