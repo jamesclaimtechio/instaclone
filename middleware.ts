@@ -19,27 +19,28 @@ const COOKIE_NAME = 'auth_token';
 // ============================================================================
 
 export async function middleware(request: NextRequest) {
-  const { pathname } = request.nextUrl;
+  try {
+    const { pathname } = request.nextUrl;
 
-  // Read authentication token from cookie
-  const token = request.cookies.get(COOKIE_NAME)?.value;
+    // Read authentication token from cookie
+    const token = request.cookies.get(COOKIE_NAME)?.value;
 
-  // Verify JWT and get user context
-  let userId: string | null = null;
-  let isAdmin: boolean = false;
+    // Verify JWT and get user context
+    let userId: string | null = null;
+    let isAdmin: boolean = false;
 
-  if (token) {
-    try {
-      const payload = await verifyToken(token);
-      userId = payload.userId;
-      isAdmin = payload.isAdmin;
-    } catch (error) {
-      // Token invalid, expired, or malformed - treat as unauthenticated
-      // Errors are expected (expired tokens, tampered tokens, etc.)
-      userId = null;
-      isAdmin = false;
+    if (token) {
+      try {
+        const payload = await verifyToken(token);
+        userId = payload.userId;
+        isAdmin = payload.isAdmin;
+      } catch (error) {
+        // Token invalid, expired, or malformed - treat as unauthenticated
+        // Errors are expected (expired tokens, tampered tokens, etc.)
+        userId = null;
+        isAdmin = false;
+      }
     }
-  }
 
   const isAuthenticated = userId !== null;
 
@@ -69,7 +70,13 @@ export async function middleware(request: NextRequest) {
     response.headers.set('x-user-is-admin', String(isAdmin));
   }
 
-  return response;
+    return response;
+  } catch (error) {
+    // Catch any unexpected errors in middleware
+    console.error('[Middleware Error]:', error);
+    // Allow request to proceed on error (fail open for better UX)
+    return NextResponse.next();
+  }
 }
 
 // ============================================================================
