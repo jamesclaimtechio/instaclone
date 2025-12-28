@@ -7,7 +7,7 @@
 ## 📊 Current Status
 
 **Active Module:** Module 12 - Password Reset  
-**Active Chunk:** Chunk 12.1 - Password Reset Backend & Email  
+**Active Chunk:** Chunk 12.2 - Reset Flow UI & Password Update  
 **Status:** ✅ Complete  
 **Started:** December 28, 2025
 
@@ -166,15 +166,15 @@
 - Integrated delete buttons into all admin list pages (desktop table + mobile cards)
 - All deletions show cascade impact before confirming
 
-### Module 12: Password Reset (1/2 chunks)
+### Module 12: Password Reset (2/2 chunks) ✅
 
 | Chunk | Name | Status | Started | Completed | Duration |
 |-------|------|--------|---------|-----------|----------|
 | 12.1 | Password Reset Backend & Email | ✅ Complete | Dec 28, 2025 | Dec 28, 2025 | ~20 min |
-| 12.2 | Reset Flow UI & Password Update | ⏳ Pending | - | - | - |
+| 12.2 | Reset Flow UI & Password Update | ✅ Complete | Dec 28, 2025 | Dec 28, 2025 | ~15 min |
 
-**Module Status:** 🚧 In Progress (1/2 chunks)  
-**Actual Duration:** ~20 min so far  
+**Module Status:** ✅ Complete (2/2 chunks)  
+**Actual Duration:** ~35 min  
 **Estimated Duration:** 6-8 hours total
 
 **Chunk 12.1 Implementation:**
@@ -183,6 +183,14 @@
 - Added password reset email template with styled button
 - Created Server Actions: requestPasswordReset, validateResetToken, resetPassword
 - Token expiry: 1 hour, one-time use, prevents email enumeration
+
+**Chunk 12.2 Implementation:**
+- Created /forgot-password page with email input form
+- Created /reset-password page with token validation and password form
+- Token validation on page load with loading/error states
+- Success message with auto-redirect to login after 3 seconds
+- Password visibility toggle for UX
+- Instagram-style dark theme UI matching existing auth pages
 
 ---
 
