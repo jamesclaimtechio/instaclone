@@ -79,6 +79,21 @@
 **Actual Duration:** ~15 min so far  
 **Estimated Duration:** 8-11 hours total
 
+### Module 6: Photo Posts & Feed (1/6 chunks)
+
+| Chunk | Name | Status | Started | Completed | Duration |
+|-------|------|--------|---------|-----------|----------|
+| 6.1 | Post Creation Backend | ✅ Complete | Dec 28, 2025 | Dec 28, 2025 | ~15 min |
+| 6.2 | Post Creation UI | ⏳ Pending | - | - | - |
+| 6.3 | Global Feed Data Layer | ⏳ Pending | - | - | - |
+| 6.4 | Feed UI Components | ⏳ Pending | - | - | - |
+| 6.5 | Post Permalink Page | ⏳ Pending | - | - | - |
+| 6.6 | Post Deletion & Cascade | ⏳ Pending | - | - | - |
+
+**Module Status:** 🚧 In Progress (1/6 chunks complete)  
+**Actual Duration:** ~15 min so far  
+**Estimated Duration:** 18-30 hours total
+
 ---
 
 ## 📝 Session Log
@@ -130,6 +145,30 @@
 ---
 
 ## ✅ Completed Chunks
+
+### Chunk 6.1 - Post Creation Backend ✅
+**Completed:** December 28, 2025  
+**Duration:** ~15 minutes  
+**Key Achievements:**
+- Created lib/posts.ts with complete post query layer
+- FeedPost type with author info, like count, comment count
+- getPostById() with LEFT JOIN for author and subqueries for counts
+- createPostInDb() inserts post and returns with author info
+- getFeedPosts() with cursor-based pagination
+- validatePostOwnership() for delete checks
+- isValidR2Url() for URL validation
+- formatPostTimestamp() for relative time display
+- Created app/actions/posts.ts with createPost Server Action
+- Full auth check, field validation, URL validation
+- BlurHash size validation (max 10KB)
+- Cache revalidation after post creation
+
+**Key Design Decisions:**
+- Cursor-based pagination using (createdAt, id) composite
+- Fetch limit+1 to determine hasMore efficiently
+- Caption stored as null if empty (not empty string)
+- LEFT JOIN handles deleted authors gracefully
+- Like/comment counts via subqueries in single query
 
 ### Chunk 4.4 - Profile Picture Upload ✅
 **Completed:** December 28, 2025  
