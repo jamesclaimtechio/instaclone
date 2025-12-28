@@ -176,8 +176,12 @@ export default async function PostPage({ params }: PostPageProps) {
                   </div>
                 )}
 
-                {/* Comments section placeholder */}
-                <CommentsSection postId={post.id} />
+                {/* Comments section */}
+                <CommentsSection 
+                  postId={post.id}
+                  postOwnerId={author.id}
+                  currentUserId={currentUser?.userId}
+                />
               </div>
 
               {/* Actions footer */}
