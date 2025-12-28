@@ -9,6 +9,10 @@ const FROM_EMAIL = process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev';
 const MAX_RETRIES = 3;
 const RETRY_DELAYS = [1000, 2000, 4000]; // 1s, 2s, 4s
 
+// NOTE: When using Resend test email (onboarding@resend.dev), you can only send
+// to the email address associated with your Resend account.
+// For production, verify a domain at resend.com/domains and use noreply@yourdomain.com
+
 // Initialize Resend client
 let resendClient: Resend | null = null;
 
