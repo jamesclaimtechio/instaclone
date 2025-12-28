@@ -175,17 +175,24 @@ export async function verifyOTP(code: string): Promise<VerifyOTPResult> {
       };
     }
 
-    // OTP is valid! Update user and delete OTP in transaction
-    await db.transaction(async (tx) => {
+    // OTP is valid! Update user and delete OTP
+    // Note: neon-http doesn't support transactions, do sequentially
+    try {
       // Set emailVerified to true
-      await tx
+      await db
         .update(users)
         .set({ emailVerified: true })
         .where(eq(users.id, user.id));
       
       // Delete used OTP
-      await tx.delete(otpCodes).where(eq(otpCodes.id, otp.id));
-    });
+      await db.delete(otpCodes).where(eq(otpCodes.id, otp.id));
+    } catch (dbError) {
+      console.error('[OTP] Database error during verification:', dbError);
+      return {
+        success: false,
+        error: 'Verification failed. Please try again.',
+      };
+    }
 
     // Reset verification attempts on success
     resetVerificationAttempts(user.id);

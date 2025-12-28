@@ -149,17 +149,17 @@ export async function invalidateUserOTPs(userId: string): Promise<void> {
  */
 export async function storeOTP(userId: string, code: string): Promise<boolean> {
   try {
-    // Use transaction to ensure atomicity
-    await db.transaction(async (tx) => {
-      // Delete any existing OTPs for this user
-      await tx.delete(otpCodes).where(eq(otpCodes.userId, userId));
-      
-      // Insert new OTP
-      await tx.insert(otpCodes).values({
-        userId,
-        code,
-        expiresAt: getOTPExpiration(),
-      });
+    // Note: neon-http driver doesn't support transactions
+    // Do operations sequentially (acceptable for MVP)
+    
+    // Delete any existing OTPs for this user
+    await db.delete(otpCodes).where(eq(otpCodes.userId, userId));
+    
+    // Insert new OTP
+    await db.insert(otpCodes).values({
+      userId,
+      code,
+      expiresAt: getOTPExpiration(),
     });
 
     return true;
