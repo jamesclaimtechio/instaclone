@@ -35,9 +35,10 @@
 | 2.2 | User Registration Flow | ✅ Complete | Dec 27, 2025 | Dec 27, 2025 | ~25 min |
 | 2.3 | Login & Logout Flow | ✅ Complete | Dec 27, 2025 | Dec 27, 2025 | ~20 min |
 | 2.4 | Auth Middleware & Route Protection | ✅ Complete | Dec 27, 2025 | Dec 27, 2025 | ~20 min |
-| 2.5 | Registration & Login UI | ⏳ Not Started | - | - | - |
+| 2.5 | Registration & Login UI | ✅ Complete | Dec 27, 2025 | Dec 27, 2025 | ~30 min |
 
-**Module Status:** 🚧 In Progress (4/5 chunks complete)  
+**Module Status:** ✅ Complete (5/5 chunks complete)  
+**Actual Duration:** ~2.2 hours  
 **Estimated Duration:** 14-18 hours total
 
 ---
@@ -275,6 +276,42 @@
 - Request headers different from response headers (must set on response)
 - getUserFromHeaders() provides user context without re-verifying JWT
 - Middleware should not make database calls (too slow, runs on every request)
+
+### Chunk 2.5 - Registration & Login UI ✅
+**Completed:** December 27, 2025  
+**Duration:** ~30 minutes  
+**Key Achievements:**
+- Created app/(auth) route group for authentication pages
+- Built auth layout with centered card design (max-w-md, gray background)
+- Created /register page with full registration form
+- Created /login page with login form
+- Registration form with email, username, password fields
+- Login form with email and password fields
+- Real-time username validation with 500ms debounce
+- Password show/hide toggle with Eye/EyeOff icons
+- Loading states with spinners during submission
+- Field-specific error display (red borders, error messages below inputs)
+- returnUrl handling in login form for deep linking
+- Navigation links between forms ("Already have account?" / "Don't have account?")
+- Full accessibility: ARIA labels, role="alert", keyboard navigation
+- Mobile optimizations: inputMode, autoComplete, autoCapitalize
+- Responsive design with shadcn/ui Card components
+- useSearchParams wrapped in Suspense boundary for static rendering
+- Production build successful (7 routes compiled)
+
+**Challenges:**
+- useSearchParams() requires Suspense boundary in Next.js for static generation
+- Fixed by wrapping LoginFormInner in Suspense with skeleton fallback
+- Build requires valid JWT_SECRET (64+ chars) even for static pages
+
+**Learnings:**
+- useSearchParams() must be wrapped in <Suspense> or page marked as dynamic
+- Controlled inputs with useState preserve user input during errors
+- Clear errors when user starts typing in error field for better UX
+- Password toggle button needs tabIndex={-1} to skip in tab order
+- autoComplete attributes help password managers: 'new-password' vs 'current-password'
+- inputMode='email' shows @ key on mobile keyboards
+- Form submission with FormData maintains HTML form semantics
 
 ---
 
