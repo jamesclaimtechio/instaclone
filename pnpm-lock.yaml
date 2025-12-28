@@ -76,6 +76,9 @@ devDependencies:
   '@types/react-dom':
     specifier: ^19
     version: 19.2.3(@types/react@19.2.7)
+  dotenv:
+    specifier: ^17.2.3
+    version: 17.2.3
   drizzle-kit:
     specifier: ^0.31.8
     version: 0.31.8
@@ -2752,6 +2755,11 @@ packages:
     engines: {node: '>=0.10.0'}
     dependencies:
       esutils: 2.0.3
+    dev: true
+
+  /dotenv@17.2.3:
+    resolution: {integrity: sha512-JVUnt+DUIzu87TABbhPmNfVdBDt18BLOWjMUFJMSi/Qqg7NTYtabbvSNJGOJ7afbRuv9D/lngizHtP7QyLQ+9w==}
+    engines: {node: '>=12'}
     dev: true
 
   /drizzle-kit@0.31.8:
