@@ -79,7 +79,7 @@
 **Actual Duration:** ~15 min so far  
 **Estimated Duration:** 8-11 hours total
 
-### Module 6: Photo Posts & Feed (4/6 chunks)
+### Module 6: Photo Posts & Feed (5/6 chunks)
 
 | Chunk | Name | Status | Started | Completed | Duration |
 |-------|------|--------|---------|-----------|----------|
@@ -87,11 +87,11 @@
 | 6.2 | Post Creation UI | ✅ Complete | Dec 28, 2025 | Dec 28, 2025 | ~15 min |
 | 6.3 | Global Feed Data Layer | ✅ Complete | Dec 28, 2025 | Dec 28, 2025 | ~0 min (done in 6.1) |
 | 6.4 | Feed UI Components | ✅ Complete | Dec 28, 2025 | Dec 28, 2025 | ~15 min |
-| 6.5 | Post Permalink Page | ⏳ Pending | - | - | - |
+| 6.5 | Post Permalink Page | ✅ Complete | Dec 28, 2025 | Dec 28, 2025 | ~10 min |
 | 6.6 | Post Deletion & Cascade | ⏳ Pending | - | - | - |
 
-**Module Status:** 🚧 In Progress (4/6 chunks complete)  
-**Actual Duration:** ~45 min so far  
+**Module Status:** 🚧 In Progress (5/6 chunks complete)  
+**Actual Duration:** ~55 min so far  
 **Estimated Duration:** 18-30 hours total
 
 ---
