@@ -6,7 +6,7 @@ import { verifyToken } from '@/lib/auth-edge';
 // ============================================================================
 
 // Public routes that don't require authentication
-const PUBLIC_ROUTES = ['/login', '/register', '/'];
+const PUBLIC_ROUTES = ['/login', '/register', '/', '/forgot-password', '/reset-password'];
 
 // Auth routes that authenticated users shouldn't access (redirect to feed)
 const AUTH_ROUTES = ['/login', '/register'];
