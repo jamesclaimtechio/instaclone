@@ -61,9 +61,9 @@
 | 4.1 | Profile Data Layer & Queries | ✅ Complete | Dec 28, 2025 | Dec 28, 2025 | ~20 min |
 | 4.2 | Profile Viewing Pages | ✅ Complete | Dec 28, 2025 | Dec 28, 2025 | ~25 min |
 | 4.3 | Profile Editing & Bio Update | ✅ Complete | Dec 28, 2025 | Dec 28, 2025 | ~20 min |
-| 4.4 | Profile Picture Upload | ⏳ Pending | - | - | - |
+| 4.4 | Profile Picture Upload | ✅ Complete | Dec 28, 2025 | Dec 28, 2025 | ~15 min |
 
-**Module Status:** 🟡 3/4 complete (Chunk 4.4 blocked on Module 5)  
+**Module Status:** ✅ Complete (4/4 chunks)  
 **Actual Duration:** ~65 min so far  
 **Estimated Duration:** 10-14 hours total
 
@@ -130,6 +130,28 @@
 ---
 
 ## ✅ Completed Chunks
+
+### Chunk 4.4 - Profile Picture Upload ✅
+**Completed:** December 28, 2025  
+**Duration:** ~15 minutes  
+**Key Achievements:**
+- Created AvatarUpload component with file selection and preview
+- Added updateProfilePicture Server Action with old image cleanup
+- Integrated avatar upload into EditProfileForm
+- FileReader for instant image preview before upload
+- Old profile picture automatically deleted from R2 on update
+- Loading, success, and error states with visual feedback
+- Camera icon overlay on hover for intuitive UX
+- TypeScript compilation and build passing
+
+**Key Design Decisions:**
+- Preview before upload using FileReader.readAsDataURL()
+- Two-step process: uploadProfilePicture → updateProfilePicture
+- Old image cleanup happens after successful upload (don't block)
+- Success message shows briefly then returns to idle state
+- File input accepts JPEG, PNG, WebP, GIF (max 50MB)
+
+**Module 4 Complete!** 🎉 User Profiles feature finished.
 
 ### Chunk 5.3 - Upload Server Action & Integration ✅
 **Completed:** December 28, 2025  

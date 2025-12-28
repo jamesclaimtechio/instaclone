@@ -2,9 +2,8 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import Image from 'next/image';
 import { updateBio } from '@/app/actions/profile';
-import { getAvatarUrl } from '@/lib/profile';
+import AvatarUpload from '@/components/profile/avatar-upload';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
@@ -109,7 +108,13 @@ export default function EditProfileForm({
     router.push(`/profile/${username}`);
   }
 
-  const avatarUrl = getAvatarUrl(profilePictureUrl, username);
+  // Track current avatar URL (updates when upload succeeds)
+  const [currentAvatar, setCurrentAvatar] = useState(profilePictureUrl);
+
+  // Handle successful avatar upload
+  const handleAvatarSuccess = (newUrl: string) => {
+    setCurrentAvatar(newUrl);
+  };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
@@ -121,20 +126,14 @@ export default function EditProfileForm({
         </div>
       )}
 
-      {/* Avatar and Username (Read-only) */}
-      <div className="flex items-center gap-4">
-        <div className="relative w-16 h-16 flex-shrink-0">
-          <Image
-            src={avatarUrl}
-            alt={`${username}'s profile picture`}
-            fill
-            className="rounded-full object-cover border border-gray-200"
-          />
-        </div>
-        <div>
-          <p className="font-semibold">{username}</p>
-          <p className="text-sm text-gray-500">Profile picture can be changed in settings</p>
-        </div>
+      {/* Avatar Upload */}
+      <div className="flex flex-col items-center py-4 border-b border-gray-100">
+        <AvatarUpload
+          username={username}
+          currentAvatarUrl={currentAvatar}
+          onSuccess={handleAvatarSuccess}
+        />
+        <p className="mt-2 text-sm font-medium text-gray-900">{username}</p>
       </div>
 
       {/* Bio Textarea */}
