@@ -6,8 +6,8 @@
 
 ## 📊 Current Status
 
-**Active Module:** Module 11 - Admin Dashboard  
-**Active Chunk:** Chunk 11.3 - Moderation Actions & Deletion  
+**Active Module:** Module 12 - Password Reset  
+**Active Chunk:** Chunk 12.1 - Password Reset Backend & Email  
 **Status:** ✅ Complete  
 **Started:** December 28, 2025
 
@@ -165,6 +165,24 @@
 - Created delete buttons with cascade info display for users, posts, comments
 - Integrated delete buttons into all admin list pages (desktop table + mobile cards)
 - All deletions show cascade impact before confirming
+
+### Module 12: Password Reset (1/2 chunks)
+
+| Chunk | Name | Status | Started | Completed | Duration |
+|-------|------|--------|---------|-----------|----------|
+| 12.1 | Password Reset Backend & Email | ✅ Complete | Dec 28, 2025 | Dec 28, 2025 | ~20 min |
+| 12.2 | Reset Flow UI & Password Update | ⏳ Pending | - | - | - |
+
+**Module Status:** 🚧 In Progress (1/2 chunks)  
+**Actual Duration:** ~20 min so far  
+**Estimated Duration:** 6-8 hours total
+
+**Chunk 12.1 Implementation:**
+- Extended otp_codes table with `type` field for 'otp' | 'password_reset'
+- Created lib/password-reset.ts with secure token generation (crypto.randomBytes)
+- Added password reset email template with styled button
+- Created Server Actions: requestPasswordReset, validateResetToken, resetPassword
+- Token expiry: 1 hour, one-time use, prevents email enumeration
 
 ---
 

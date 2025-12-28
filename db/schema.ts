@@ -131,6 +131,7 @@ export type NewFollow = typeof follows.$inferInsert;
 
 // ============================================================================
 // OTP_CODES TABLE
+// Supports both email verification OTPs and password reset tokens via 'type' field
 // ============================================================================
 export const otpCodes = pgTable(
   'otp_codes',
@@ -139,16 +140,19 @@ export const otpCodes = pgTable(
     userId: uuid('user_id')
       .notNull()
       .references(() => users.id, { onDelete: 'cascade' }),
-    code: text('code').notNull(), // Stored as text to preserve leading zeros
+    code: text('code').notNull(), // OTP (6 digits) or reset token (64-char hex)
+    type: text('type').notNull().default('otp'), // 'otp' | 'password_reset'
     expiresAt: timestamp('expires_at').notNull(),
     createdAt: timestamp('created_at').notNull().defaultNow(),
   },
   (table) => ({
     userIdIdx: index('idx_otp_codes_user_id').on(table.userId),
     expiresAtIdx: index('idx_otp_codes_expires_at').on(table.expiresAt),
+    typeIdx: index('idx_otp_codes_type').on(table.type),
   })
 );
 
 export type OtpCode = typeof otpCodes.$inferSelect;
 export type NewOtpCode = typeof otpCodes.$inferInsert;
+export type OtpCodeType = 'otp' | 'password_reset';
 
