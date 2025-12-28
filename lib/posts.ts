@@ -1,5 +1,6 @@
 import { db, posts, users } from '@/db';
 import { eq, desc, sql } from 'drizzle-orm';
+import { getUserLikes } from './likes';
 
 // Re-export types and utilities from the client-safe file
 export * from './posts.types';
@@ -22,15 +23,24 @@ import { DEFAULT_FEED_LIMIT, MAX_FEED_LIMIT } from './posts.types';
  * Gets a single post by ID with author information and counts
  * 
  * @param postId - The UUID of the post to fetch
+ * @param currentUserId - Optional user ID to determine if post is liked by current user
  * @returns The post with author info, or null if not found
  */
-export async function getPostById(postId: string): Promise<FeedPost | null> {
+export async function getPostById(
+  postId: string,
+  currentUserId?: string | null
+): Promise<FeedPost | null> {
   try {
     // Validate UUID format
     const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
     if (!uuidRegex.test(postId)) {
       return null;
     }
+
+    // Build isLiked subquery based on whether we have a current user
+    const isLikedQuery = currentUserId
+      ? sql<boolean>`EXISTS(SELECT 1 FROM likes WHERE likes.post_id = ${posts.id} AND likes.user_id = ${currentUserId})`
+      : sql<boolean>`false`;
 
     const result = await db
       .select({
@@ -46,6 +56,7 @@ export async function getPostById(postId: string): Promise<FeedPost | null> {
         authorProfilePictureUrl: users.profilePictureUrl,
         likeCount: sql<number>`COALESCE((SELECT COUNT(*) FROM likes WHERE likes.post_id = ${posts.id}), 0)::int`,
         commentCount: sql<number>`COALESCE((SELECT COUNT(*) FROM comments WHERE comments.post_id = ${posts.id}), 0)::int`,
+        isLiked: isLikedQuery,
       })
       .from(posts)
       .leftJoin(users, eq(posts.userId, users.id))
@@ -73,6 +84,7 @@ export async function getPostById(postId: string): Promise<FeedPost | null> {
       },
       likeCount: row.likeCount,
       commentCount: row.commentCount,
+      isLiked: row.isLiked ?? false,
     };
   } catch (error) {
     console.error('[Posts] Error fetching post by ID:', error);
@@ -132,18 +144,29 @@ export async function createPostInDb(input: CreatePostInput): Promise<FeedPost> 
     },
     likeCount: 0,
     commentCount: 0,
+    isLiked: false, // Newly created post is not liked
   };
+}
+
+/**
+ * Extended pagination options that include current user for like status
+ */
+export interface FeedPaginationOptionsWithUser extends FeedPaginationOptions {
+  currentUserId?: string | null;
 }
 
 /**
  * Fetches paginated posts for the global feed
  * Ordered by createdAt DESC (newest first)
  * 
- * @param options - Pagination options
+ * @param options - Pagination options including optional currentUserId
  * @returns Paginated feed response
  */
-export async function getFeedPosts(options: FeedPaginationOptions = {}): Promise<FeedResponse> {
+export async function getFeedPosts(
+  options: FeedPaginationOptionsWithUser = {}
+): Promise<FeedResponse> {
   const limit = Math.min(options.limit || DEFAULT_FEED_LIMIT, MAX_FEED_LIMIT);
+  const { currentUserId } = options;
   
   // Fetch one extra to check if there are more
   const queryLimit = limit + 1;
@@ -186,6 +209,12 @@ export async function getFeedPosts(options: FeedPaginationOptions = {}): Promise
   const hasMore = result.length > limit;
   const postsToReturn = hasMore ? result.slice(0, limit) : result;
 
+  // Batch fetch like statuses if we have a current user
+  const postIds = postsToReturn.map((row) => row.id);
+  const likedPostIds = currentUserId
+    ? await getUserLikes(currentUserId, postIds)
+    : new Set<string>();
+
   // Build the response
   const feedPosts: FeedPost[] = postsToReturn.map((row) => ({
     id: row.id,
@@ -202,6 +231,7 @@ export async function getFeedPosts(options: FeedPaginationOptions = {}): Promise
     },
     likeCount: row.likeCount,
     commentCount: row.commentCount,
+    isLiked: likedPostIds.has(row.id),
   }));
 
   // Build next cursor from last post

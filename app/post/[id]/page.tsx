@@ -60,11 +60,11 @@ export async function generateMetadata({ params }: PostPageProps) {
 export default async function PostPage({ params }: PostPageProps) {
   const { id } = await params;
   
-  // Fetch post and current user in parallel
-  const [post, currentUser] = await Promise.all([
-    getPostById(id),
-    getCurrentUser(),
-  ]);
+  // Get current user first for like status
+  const currentUser = await getCurrentUser();
+  
+  // Fetch post with like status
+  const post = await getPostById(id, currentUser?.userId);
 
   if (!post) {
     notFound();

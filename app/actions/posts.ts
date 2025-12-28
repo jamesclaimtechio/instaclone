@@ -185,7 +185,9 @@ export async function createPost(data: CreatePostData): Promise<CreatePostResult
  */
 export async function getPost(postId: string): Promise<GetPostResult> {
   try {
-    const post = await getPostById(postId);
+    // Get current user for like status
+    const currentUser = await getCurrentUser();
+    const post = await getPostById(postId, currentUser?.userId);
     
     if (!post) {
       return {
@@ -236,17 +238,19 @@ export async function loadMorePosts(
   limit?: number
 ): Promise<FeedResponse> {
   try {
-    const options: FeedPaginationOptions = {
+    // Get current user for like status
+    const currentUser = await getCurrentUser();
+    
+    const options = {
       limit,
+      currentUserId: currentUser?.userId,
+      cursor: cursor
+        ? {
+            createdAt: new Date(cursor.createdAt),
+            id: cursor.id,
+          }
+        : undefined,
     };
-
-    // Convert serialized cursor to Date + id
-    if (cursor) {
-      options.cursor = {
-        createdAt: new Date(cursor.createdAt),
-        id: cursor.id,
-      };
-    }
 
     const response = await getFeedPosts(options);
     return response;
@@ -310,7 +314,7 @@ export async function deletePost(postId: string): Promise<DeletePostResult> {
     // =========================================================================
     // STEP 2: Fetch Post and Verify Ownership
     // =========================================================================
-    const post = await getPostById(postId);
+    const post = await getPostById(postId, currentUser.userId);
     
     if (!post) {
       return {
