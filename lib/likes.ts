@@ -163,7 +163,14 @@ export async function createLike(postId: string, userId: string): Promise<number
   } catch (error: any) {
     // Handle unique constraint violation (user already liked this post)
     // This is expected and idempotent - just return current count
-    if (error?.code === '23505' || error?.message?.includes('unique')) {
+    // Note: Drizzle/Neon wraps the PostgreSQL error in error.cause
+    const pgErrorCode = error?.code || error?.cause?.code;
+    const isUniqueViolation = 
+      pgErrorCode === '23505' || 
+      error?.message?.includes('unique') ||
+      error?.cause?.message?.includes('unique');
+
+    if (isUniqueViolation) {
       console.log('[Likes] Like already exists (idempotent):', postId, userId);
       return await getLikeCount(postId);
     }
