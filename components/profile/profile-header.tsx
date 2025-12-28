@@ -1,6 +1,6 @@
 import Image from 'next/image';
 import Link from 'next/link';
-import { ProfileUser, ProfileStats as ProfileStatsType, getAvatarUrl } from '@/lib/profile';
+import { ProfileUser, ProfileStats as ProfileStatsType, getAvatarUrl } from '@/lib/profile.types';
 import ProfileStats from './profile-stats';
 import { Button } from '@/components/ui/button';
 import { Settings } from 'lucide-react';

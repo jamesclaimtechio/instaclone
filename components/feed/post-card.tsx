@@ -3,8 +3,8 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { Heart, MessageCircle } from 'lucide-react';
-import { formatPostTimestamp, FeedPost } from '@/lib/posts';
-import { getAvatarUrl } from '@/lib/profile';
+import { formatPostTimestamp, FeedPost } from '@/lib/posts.types';
+import { getAvatarUrl } from '@/lib/profile.types';
 
 // ============================================================================
 // TYPES

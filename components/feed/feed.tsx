@@ -5,7 +5,7 @@ import { Loader2 } from 'lucide-react';
 import PostCard from '@/components/feed/post-card';
 import EmptyFeed, { EndOfFeed } from '@/components/feed/empty-feed';
 import { loadMorePosts, SerializedCursor } from '@/app/actions/posts';
-import { FeedPost } from '@/lib/posts';
+import { FeedPost } from '@/lib/posts.types';
 
 // ============================================================================
 // TYPES

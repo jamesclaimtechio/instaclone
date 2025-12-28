@@ -1,6 +1,6 @@
 import Image from 'next/image';
 import Link from 'next/link';
-import { ProfilePost } from '@/lib/profile';
+import { ProfilePost } from '@/lib/profile.types';
 import { Heart, MessageCircle } from 'lucide-react';
 
 interface PostThumbnailProps {

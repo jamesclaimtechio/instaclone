@@ -1,4 +1,4 @@
-import { ProfileStats as ProfileStatsType } from '@/lib/profile';
+import { ProfileStats as ProfileStatsType } from '@/lib/profile.types';
 
 interface ProfileStatsProps {
   stats: ProfileStatsType;

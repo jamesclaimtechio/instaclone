@@ -1,4 +1,4 @@
-import { ProfilePost } from '@/lib/profile';
+import { ProfilePost } from '@/lib/profile.types';
 import PostThumbnail from './post-thumbnail';
 import EmptyPosts from './empty-posts';
 

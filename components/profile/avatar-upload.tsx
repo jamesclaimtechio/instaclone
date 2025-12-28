@@ -4,7 +4,7 @@ import { useState, useRef, useCallback } from 'react';
 import Image from 'next/image';
 import { uploadProfilePicture } from '@/app/actions/upload';
 import { updateProfilePicture } from '@/app/actions/profile';
-import { getAvatarUrl } from '@/lib/profile';
+import { getAvatarUrl } from '@/lib/profile.types';
 import { Button } from '@/components/ui/button';
 import { Loader2, Camera, AlertCircle, Check } from 'lucide-react';
 

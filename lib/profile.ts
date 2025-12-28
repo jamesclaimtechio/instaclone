@@ -1,60 +1,17 @@
 import { db, users, posts, follows } from '@/db';
-import { eq, desc, lt, sql, count } from 'drizzle-orm';
+import { eq, desc, sql, count } from 'drizzle-orm';
 
-// ============================================================================
-// TYPES
-// ============================================================================
+// Re-export types and utilities from the client-safe file
+export * from './profile.types';
 
-/**
- * Public user fields only - never expose passwordHash, email, emailVerified, isAdmin
- */
-export type ProfileUser = {
-  id: string;
-  username: string;
-  bio: string | null;
-  profilePictureUrl: string | null;
-  createdAt: Date;
-};
-
-/**
- * Profile statistics - follower, following, and posts counts
- */
-export type ProfileStats = {
-  followers: number;
-  following: number;
-  posts: number;
-};
-
-/**
- * Post data for profile grid display
- */
-export type ProfilePost = {
-  id: string;
-  imageUrl: string;
-  thumbnailUrl: string;
-  blurHash: string;
-  caption: string | null;
-  createdAt: Date;
-};
-
-/**
- * Paginated posts response with cursor for next page
- */
-export type ProfilePostsResponse = {
-  posts: ProfilePost[];
-  nextCursor: Date | null;
-  hasMore: boolean;
-};
-
-/**
- * Complete profile data combining user, stats, posts, and ownership
- */
-export type ProfileData = {
-  user: ProfileUser;
-  stats: ProfileStats;
-  posts: ProfilePostsResponse;
-  isOwnProfile: boolean;
-};
+// Import types for use in this file
+import type {
+  ProfileUser,
+  ProfileStats,
+  ProfilePost,
+  ProfilePostsResponse,
+  ProfileData,
+} from './profile.types';
 
 // ============================================================================
 // CONSTANTS
@@ -62,12 +19,8 @@ export type ProfileData = {
 
 const DEFAULT_POSTS_LIMIT = 20;
 
-// DiceBear API for generating consistent default avatars from username
-// Using "initials" style - shows first letter(s) of username
-const DICEBEAR_BASE_URL = 'https://api.dicebear.com/7.x/initials/svg';
-
 // ============================================================================
-// CORE QUERIES
+// CORE QUERIES (Server-only - requires database)
 // ============================================================================
 
 /**
@@ -178,61 +131,13 @@ export async function getProfilePosts(
   // Get the cursor for the next page (createdAt of the last post)
   const nextCursor = postsToReturn.length > 0
     ? postsToReturn[postsToReturn.length - 1]!.createdAt
-    : null;
+    : undefined;
 
   return {
     posts: postsToReturn,
-    nextCursor: hasMore ? nextCursor : null,
+    nextCursor: hasMore ? nextCursor : undefined,
     hasMore,
   };
-}
-
-// ============================================================================
-// UTILITY FUNCTIONS
-// ============================================================================
-
-/**
- * Checks if the current user is viewing their own profile
- * 
- * @param currentUserId - The ID of the currently logged in user (null if not logged in)
- * @param profileUserId - The ID of the profile being viewed
- * @returns true if viewing own profile, false otherwise
- */
-export function isOwnProfile(currentUserId: string | null, profileUserId: string): boolean {
-  if (!currentUserId) {
-    return false;
-  }
-  return currentUserId === profileUserId;
-}
-
-/**
- * Generates a consistent default avatar URL using DiceBear API
- * Uses the "initials" style which shows first letter(s) of the username
- * 
- * @param username - The username to generate avatar for
- * @returns URL to the generated avatar SVG
- */
-export function getDefaultAvatarUrl(username: string): string {
-  // Encode username for URL safety
-  const encodedSeed = encodeURIComponent(username);
-  
-  // Use a pleasant background color palette
-  // DiceBear initials style generates colors based on the seed
-  return `${DICEBEAR_BASE_URL}?seed=${encodedSeed}&backgroundColor=c0aede,d1d4f9,ffd5dc,ffdfbf,b6e3f4&backgroundType=gradientLinear`;
-}
-
-/**
- * Returns the appropriate avatar URL - profile picture if exists, default otherwise
- * 
- * @param profilePictureUrl - The user's profile picture URL (may be null)
- * @param username - The username (used for generating default avatar)
- * @returns URL to display as avatar
- */
-export function getAvatarUrl(profilePictureUrl: string | null, username: string): string {
-  if (profilePictureUrl && profilePictureUrl.trim().length > 0) {
-    return profilePictureUrl;
-  }
-  return getDefaultAvatarUrl(username);
 }
 
 // ============================================================================
@@ -251,6 +156,9 @@ export async function getFullProfile(
   username: string,
   currentUserId?: string | null
 ): Promise<ProfileData | null> {
+  // Import isOwnProfile from the types file
+  const { isOwnProfile } = await import('./profile.types');
+  
   // First, fetch the user - if not found, return null for 404
   const user = await getProfileByUsername(username);
   
@@ -267,7 +175,7 @@ export async function getFullProfile(
   return {
     user,
     stats,
-    posts: postsResponse,
+    posts: postsResponse.posts,
     isOwnProfile: isOwnProfile(currentUserId ?? null, user.id),
   };
 }
@@ -288,4 +196,3 @@ export async function usernameExists(username: string): Promise<boolean> {
 
   return result.length > 0;
 }
-

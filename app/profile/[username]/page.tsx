@@ -73,7 +73,7 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
 
         {/* Posts Grid */}
         <PostsGrid
-          posts={profile.posts.posts}
+          posts={profile.posts}
           isOwnProfile={profile.isOwnProfile}
           username={profile.user.username}
         />
