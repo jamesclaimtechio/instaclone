@@ -1,6 +1,6 @@
 'use client';
 
-import { useOptimistic, useTransition } from 'react';
+import { useOptimistic, useTransition, useRef, useCallback } from 'react';
 import { Heart } from 'lucide-react';
 import { toast } from 'sonner';
 import { likePost, unlikePost } from '@/app/actions/likes';
@@ -29,12 +29,36 @@ interface LikeState {
 type LikeAction = 'like' | 'unlike';
 
 // ============================================================================
+// CONSTANTS
+// ============================================================================
+
+const MAX_RETRY_ATTEMPTS = 3;
+const TOAST_DURATION = 5000;
+
+// Error type mapping for user-friendly messages
+const ERROR_MESSAGES: Record<string, { message: string; canRetry: boolean }> = {
+  'Not authenticated': {
+    message: 'Please log in to like posts',
+    canRetry: false,
+  },
+  'Post not found': {
+    message: 'This post has been deleted',
+    canRetry: false,
+  },
+  'Invalid post ID': {
+    message: 'Something went wrong',
+    canRetry: false,
+  },
+};
+
+// ============================================================================
 // COMPONENT
 // ============================================================================
 
 /**
  * Interactive like button with optimistic UI updates
  * Uses React 19's useOptimistic for instant feedback
+ * Includes retry functionality and specific error handling
  */
 export default function LikeButton({
   postId,
@@ -46,6 +70,9 @@ export default function LikeButton({
 }: LikeButtonProps) {
   // useTransition for pending state to disable button during request
   const [isPending, startTransition] = useTransition();
+
+  // Track consecutive failed attempts for retry limiting
+  const failedAttemptsRef = useRef(0);
 
   // useOptimistic for instant UI updates before server confirms
   const [optimisticState, addOptimistic] = useOptimistic<LikeState, LikeAction>(
@@ -68,8 +95,42 @@ export default function LikeButton({
 
   const { isLiked, likeCount } = optimisticState;
 
+  /**
+   * Show error toast with appropriate message and optional retry button
+   */
+  const showErrorToast = useCallback((errorMessage: string, retryAction: () => void) => {
+    // Check if this is a known error type
+    const knownError = ERROR_MESSAGES[errorMessage];
+    
+    if (knownError) {
+      // Known error - show specific message, may or may not have retry
+      toast.error(knownError.message, {
+        duration: TOAST_DURATION,
+      });
+      return;
+    }
+
+    // Check retry limit
+    if (failedAttemptsRef.current >= MAX_RETRY_ATTEMPTS) {
+      // Max retries reached - show connection message without retry
+      toast.error('Please check your connection and try again later', {
+        duration: TOAST_DURATION,
+      });
+      return;
+    }
+
+    // Generic error with retry button
+    toast.error('Action failed. Try again.', {
+      duration: TOAST_DURATION,
+      action: {
+        label: 'Retry',
+        onClick: retryAction,
+      },
+    });
+  }, []);
+
   // Handle like/unlike action
-  const handleClick = () => {
+  const handleClick = useCallback(() => {
     // Prevent multiple clicks while request is in flight
     if (isPending) return;
 
@@ -87,17 +148,27 @@ export default function LikeButton({
           : await likePost(postId);
 
         if (!result.success) {
-          // Show error toast - optimistic state will rollback automatically
-          toast.error(result.error || 'Action failed. Try again.');
+          // Increment failed attempts counter
+          failedAttemptsRef.current += 1;
+          
+          // Show error toast with retry option
+          showErrorToast(result.error || 'Action failed', handleClick);
+        } else {
+          // Success - reset failed attempts counter
+          failedAttemptsRef.current = 0;
         }
       } catch (error) {
         // Network error or unexpected failure
         console.error('[LikeButton] Error:', error);
-        toast.error('Action failed. Please try again.');
-        // useOptimistic automatically rolls back on error
+        
+        // Increment failed attempts counter
+        failedAttemptsRef.current += 1;
+        
+        // Show error toast with retry option
+        showErrorToast('Network error', handleClick);
       }
     });
-  };
+  }, [isPending, isLiked, postId, addOptimistic, showErrorToast]);
 
   // Icon sizes based on variant
   const iconSizes = {
@@ -170,4 +241,3 @@ export default function LikeButton({
     </div>
   );
 }
-
