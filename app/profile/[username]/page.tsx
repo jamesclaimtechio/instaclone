@@ -66,6 +66,8 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
           user={profile.user}
           stats={profile.stats}
           isOwnProfile={profile.isOwnProfile}
+          isFollowing={profile.isFollowing}
+          currentUserId={currentUser?.userId}
         />
 
         {/* Divider */}

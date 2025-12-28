@@ -2,6 +2,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { ProfileUser, ProfileStats as ProfileStatsType, getAvatarUrl } from '@/lib/profile.types';
 import ProfileStats from './profile-stats';
+import FollowButton from './follow-button';
 import { Button } from '@/components/ui/button';
 import { Settings } from 'lucide-react';
 
@@ -9,13 +10,27 @@ interface ProfileHeaderProps {
   user: ProfileUser;
   stats: ProfileStatsType;
   isOwnProfile: boolean;
+  /** Whether the current user is following this profile (undefined if not logged in or own profile) */
+  isFollowing?: boolean;
+  /** Current user's ID for authentication checks */
+  currentUserId?: string;
 }
 
 /**
  * Profile header component displaying avatar, username, bio, stats, and action buttons
  */
-export default function ProfileHeader({ user, stats, isOwnProfile }: ProfileHeaderProps) {
+export default function ProfileHeader({ 
+  user, 
+  stats, 
+  isOwnProfile,
+  isFollowing,
+  currentUserId,
+}: ProfileHeaderProps) {
   const avatarUrl = getAvatarUrl(user.profilePictureUrl, user.username);
+
+  // Determine if we should show the follow button
+  // Show only when: not own profile AND user is logged in
+  const showFollowButton = !isOwnProfile && currentUserId;
 
   return (
     <header className="w-full">
@@ -46,7 +61,14 @@ export default function ProfileHeader({ user, stats, isOwnProfile }: ProfileHead
                     Edit Profile
                   </Button>
                 </Link>
+              ) : showFollowButton ? (
+                <FollowButton
+                  targetUserId={user.id}
+                  initialIsFollowing={isFollowing ?? false}
+                  initialFollowerCount={stats.followers}
+                />
               ) : (
+                // Not logged in - show disabled follow button
                 <Button variant="default" size="sm" className="w-full" disabled>
                   Follow
                 </Button>
@@ -94,7 +116,14 @@ export default function ProfileHeader({ user, stats, isOwnProfile }: ProfileHead
                   Edit Profile
                 </Button>
               </Link>
+            ) : showFollowButton ? (
+              <FollowButton
+                targetUserId={user.id}
+                initialIsFollowing={isFollowing ?? false}
+                initialFollowerCount={stats.followers}
+              />
             ) : (
+              // Not logged in - show disabled follow button
               <Button variant="default" size="sm" disabled>
                 Follow
               </Button>
@@ -119,4 +148,3 @@ export default function ProfileHeader({ user, stats, isOwnProfile }: ProfileHead
     </header>
   );
 }
-
