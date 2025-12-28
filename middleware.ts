@@ -11,6 +11,9 @@ const PUBLIC_ROUTES = ['/login', '/register', '/'];
 // Auth routes that authenticated users shouldn't access (redirect to feed)
 const AUTH_ROUTES = ['/login', '/register'];
 
+// Admin routes that require isAdmin = true
+const ADMIN_ROUTES_PREFIX = '/admin';
+
 // Cookie name (must match lib/auth.ts)
 const COOKIE_NAME = 'auth_token';
 
@@ -59,6 +62,13 @@ export async function middleware(request: NextRequest) {
     }
     
     return NextResponse.redirect(loginUrl);
+  }
+
+  // If non-admin user tries to access admin routes, redirect to home with error
+  if (pathname.startsWith(ADMIN_ROUTES_PREFIX) && !isAdmin) {
+    const homeUrl = new URL('/', request.url);
+    homeUrl.searchParams.set('error', 'admin_required');
+    return NextResponse.redirect(homeUrl);
   }
 
   // For authenticated requests, inject user context into headers
