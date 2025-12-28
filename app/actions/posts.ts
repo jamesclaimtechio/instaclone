@@ -4,8 +4,11 @@ import { getCurrentUser } from '@/lib/auth';
 import {
   createPostInDb,
   getPostById,
+  getFeedPosts,
   isValidR2Url,
   type FeedPost,
+  type FeedResponse,
+  type FeedPaginationOptions,
 } from '@/lib/posts';
 import { revalidatePath } from 'next/cache';
 
@@ -201,6 +204,59 @@ export async function getPost(postId: string): Promise<GetPostResult> {
     return {
       success: false,
       error: 'Failed to get post. Please try again.',
+    };
+  }
+}
+
+// ============================================================================
+// FEED ACTIONS
+// ============================================================================
+
+/**
+ * Cursor data for pagination - serializable for client/server transfer
+ */
+export interface SerializedCursor {
+  createdAt: string; // ISO date string
+  id: string;
+}
+
+/**
+ * Load more posts for infinite scroll
+ * 
+ * @param cursor - The cursor from the previous page (optional for first page)
+ * @param limit - Number of posts to fetch (optional, defaults to 25)
+ * @returns Feed response with posts and pagination info
+ */
+export async function loadMorePosts(
+  cursor?: SerializedCursor,
+  limit?: number
+): Promise<FeedResponse> {
+  try {
+    const options: FeedPaginationOptions = {
+      limit,
+    };
+
+    // Convert serialized cursor to Date + id
+    if (cursor) {
+      options.cursor = {
+        createdAt: new Date(cursor.createdAt),
+        id: cursor.id,
+      };
+    }
+
+    const response = await getFeedPosts(options);
+    return response;
+  } catch (error: any) {
+    // Handle NEXT_REDIRECT
+    if (error?.digest?.includes('NEXT_REDIRECT')) {
+      throw error;
+    }
+
+    console.error('[Posts] Error loading feed:', error);
+    // Return empty response on error
+    return {
+      posts: [],
+      hasMore: false,
     };
   }
 }
