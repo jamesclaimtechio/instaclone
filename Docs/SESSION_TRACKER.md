@@ -6,10 +6,10 @@
 
 ## 📊 Current Status
 
-**Active Module:** Module 4 - User Profiles  
-**Active Chunk:** Chunk 4.3 - Profile Editing & Bio Update  
+**Active Module:** Module 7 - Likes System  
+**Active Chunk:** Chunk 7.1 - Likes Data Layer  
 **Status:** ✅ Complete  
-**Started:** December 27, 2025
+**Started:** December 28, 2025
 
 ---
 
@@ -94,6 +94,18 @@
 **Actual Duration:** ~65 min  
 **Estimated Duration:** 18-30 hours total
 
+### Module 7: Likes System (1/3 chunks)
+
+| Chunk | Name | Status | Started | Completed | Duration |
+|-------|------|--------|---------|-----------|----------|
+| 7.1 | Likes Data Layer | ✅ Complete | Dec 28, 2025 | Dec 28, 2025 | ~20 min |
+| 7.2 | Like Button UI with Optimistic Updates | ⏳ Pending | - | - | - |
+| 7.3 | Like State Persistence & Edge Cases | ⏳ Pending | - | - | - |
+
+**Module Status:** 🚧 In Progress (1/3 chunks)  
+**Actual Duration:** ~20 min so far  
+**Estimated Duration:** 8-12 hours total
+
 ---
 
 ## 📝 Session Log
@@ -145,6 +157,30 @@
 ---
 
 ## ✅ Completed Chunks
+
+### Chunk 7.1 - Likes Data Layer ✅
+**Completed:** December 28, 2025  
+**Duration:** ~20 minutes  
+**Key Achievements:**
+- Created lib/likes.ts with complete likes query layer
+- getLikeStatus() checks if user liked a post
+- getLikeCount() returns total like count for a post
+- getUserLikes() batch fetches liked post IDs efficiently with IN clause
+- createLike() and deleteLike() with idempotent handling
+- Created app/actions/likes.ts with likePost, unlikePost, toggleLike Server Actions
+- Authentication check in all Server Actions
+- Duplicate constraint handled gracefully (returns success)
+- Updated FeedPost interface to include isLiked boolean
+- Updated getFeedPosts() and getPostById() with optional currentUserId
+- Batch like status fetching for efficient feed queries
+- TypeScript compilation and build passing
+
+**Key Design Decisions:**
+- Idempotent operations: liking already-liked post returns success, not error
+- Batch fetch like statuses with getUserLikes() to avoid N+1 queries
+- EXISTS subquery for single post like status
+- UUID validation before all database operations
+- NEXT_REDIRECT error handling pattern maintained
 
 ### Chunk 6.1 - Post Creation Backend ✅
 **Completed:** December 28, 2025  
