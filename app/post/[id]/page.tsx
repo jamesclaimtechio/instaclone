@@ -2,10 +2,12 @@ import { notFound } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 import { ArrowLeft, Heart, MessageCircle } from 'lucide-react';
-import { getPostById, formatPostTimestamp } from '@/lib/posts';
+import { getPostById, formatPostTimestamp, validatePostOwnership } from '@/lib/posts';
 import { getAvatarUrl } from '@/lib/profile';
+import { getCurrentUser } from '@/lib/auth';
 import { Button } from '@/components/ui/button';
 import CommentsSection from '@/components/posts/comments-section';
+import DeletePostButton from '@/components/posts/delete-post-button';
 
 // ============================================================================
 // TYPES
@@ -58,12 +60,20 @@ export async function generateMetadata({ params }: PostPageProps) {
 export default async function PostPage({ params }: PostPageProps) {
   const { id } = await params;
   
-  // Fetch post
-  const post = await getPostById(id);
+  // Fetch post and current user in parallel
+  const [post, currentUser] = await Promise.all([
+    getPostById(id),
+    getCurrentUser(),
+  ]);
 
   if (!post) {
     notFound();
   }
+
+  // Check if current user is the post owner
+  const isOwner = currentUser 
+    ? validatePostOwnership(currentUser.userId, post)
+    : false;
 
   const { author, caption, imageUrl, blurHash, likeCount, commentCount, createdAt } = post;
   const timestamp = formatPostTimestamp(createdAt);
@@ -130,6 +140,8 @@ export default async function PostPage({ params }: PostPageProps) {
                     {author.username}
                   </Link>
                 </div>
+                {/* Delete button - only for post owner */}
+                {isOwner && <DeletePostButton postId={post.id} />}
               </header>
 
               {/* Caption and comments scroll area */}

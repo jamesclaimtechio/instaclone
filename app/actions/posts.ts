@@ -6,10 +6,14 @@ import {
   getPostById,
   getFeedPosts,
   isValidR2Url,
+  validatePostOwnership,
   type FeedPost,
   type FeedResponse,
   type FeedPaginationOptions,
 } from '@/lib/posts';
+import { deleteFromR2, extractObjectKeyFromUrl } from '@/lib/r2';
+import { db, posts } from '@/db';
+import { eq } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
 
 // ============================================================================
@@ -257,6 +261,129 @@ export async function loadMorePosts(
     return {
       posts: [],
       hasMore: false,
+    };
+  }
+}
+
+// ============================================================================
+// DELETE ACTIONS
+// ============================================================================
+
+/**
+ * Result of post deletion
+ */
+export type DeletePostResult =
+  | { success: true }
+  | { success: false; error: string };
+
+/**
+ * Deletes a post and its associated R2 images
+ * 
+ * @param postId - The UUID of the post to delete
+ * @returns Success or error result
+ * 
+ * @example
+ * ```typescript
+ * const result = await deletePost('abc123-uuid');
+ * 
+ * if (result.success) {
+ *   router.push('/');
+ * } else {
+ *   console.error(result.error);
+ * }
+ * ```
+ */
+export async function deletePost(postId: string): Promise<DeletePostResult> {
+  try {
+    // =========================================================================
+    // STEP 1: Authentication Check
+    // =========================================================================
+    const currentUser = await getCurrentUser();
+    
+    if (!currentUser) {
+      return {
+        success: false,
+        error: 'You must be logged in to delete a post.',
+      };
+    }
+
+    // =========================================================================
+    // STEP 2: Fetch Post and Verify Ownership
+    // =========================================================================
+    const post = await getPostById(postId);
+    
+    if (!post) {
+      return {
+        success: false,
+        error: 'Post not found.',
+      };
+    }
+
+    // Check if user owns the post
+    if (!validatePostOwnership(currentUser.userId, post)) {
+      console.warn('[Posts] Unauthorized delete attempt:', {
+        postId,
+        postOwnerId: post.userId,
+        attemptingUserId: currentUser.userId,
+      });
+      return {
+        success: false,
+        error: 'You can only delete your own posts.',
+      };
+    }
+
+    // =========================================================================
+    // STEP 3: Delete from Database (cascades to likes/comments)
+    // =========================================================================
+    await db.delete(posts).where(eq(posts.id, postId));
+
+    console.log('[Posts] Post deleted:', {
+      postId,
+      userId: currentUser.userId,
+    });
+
+    // =========================================================================
+    // STEP 4: Clean up R2 Images (best effort, non-blocking)
+    // =========================================================================
+    // Don't fail the delete if R2 cleanup fails
+    try {
+      const imageKey = extractObjectKeyFromUrl(post.imageUrl);
+      const thumbnailKey = extractObjectKeyFromUrl(post.thumbnailUrl);
+
+      if (imageKey) {
+        await deleteFromR2(imageKey);
+      }
+      if (thumbnailKey) {
+        await deleteFromR2(thumbnailKey);
+      }
+
+      console.log('[Posts] R2 images cleaned up:', { imageKey, thumbnailKey });
+    } catch (r2Error) {
+      // Log but don't fail the deletion
+      console.error('[Posts] R2 cleanup failed (non-critical):', r2Error);
+    }
+
+    // =========================================================================
+    // STEP 5: Revalidate Caches
+    // =========================================================================
+    revalidatePath('/');
+    revalidatePath('/feed');
+    revalidatePath(`/profile/${post.author.username}`);
+    revalidatePath(`/post/${postId}`);
+
+    return {
+      success: true,
+    };
+  } catch (error: any) {
+    // Handle NEXT_REDIRECT
+    if (error?.digest?.includes('NEXT_REDIRECT')) {
+      throw error;
+    }
+
+    console.error('[Posts] Error deleting post:', error);
+    return {
+      success: false,
+      error: 'Failed to delete post. Please try again.',
     };
   }
 }
