@@ -46,11 +46,11 @@
 | Chunk | Name | Status | Started | Completed | Duration |
 |-------|------|--------|---------|-----------|----------|
 | 3.1 | Email Service Integration | ✅ Complete | Dec 28, 2025 | Dec 28, 2025 | ~25 min |
-| 3.2 | OTP Generation & Storage | ⏳ Not Started | - | - | - |
+| 3.2 | OTP Generation & Storage | ✅ Complete | Dec 28, 2025 | Dec 28, 2025 | ~20 min |
 | 3.3 | OTP Verification Flow | ⏳ Not Started | - | - | - |
 | 3.4 | Verification UI & Enforcement | ⏳ Not Started | - | - | - |
 
-**Module Status:** 🚧 In Progress (1/4 chunks complete)  
+**Module Status:** 🚧 In Progress (2/4 chunks complete)  
 **Estimated Duration:** 8-12 hours total
 
 ---
@@ -132,6 +132,39 @@
 - OTP code should be 48px font, bold, letter-spaced for readability
 - Retry only on 5xx and network errors, not 4xx (permanent failures)
 - Email service errors shouldn't block registration (return false, don't throw)
+
+### Chunk 3.2 - OTP Generation & Storage ✅
+**Completed:** December 28, 2025  
+**Duration:** ~20 minutes  
+**Key Achievements:**
+- Created lib/otp.ts with complete OTP utilities
+- Implemented generateOTP() using crypto.randomInt(0, 1000000) for cryptographic security
+- 6-digit codes with leading zero preservation (000000-999999)
+- Implemented getOTPExpiration() calculating 15-minute expiry
+- Built storeOTP() with transaction to delete old codes and insert new one
+- Created invalidateUserOTPs() to clear previous codes
+- Implemented sendOTPToUser() combining generation, storage, and email sending
+- Integrated OTP sending into registration flow (after user created)
+- Created resendOTP Server Action in app/actions/otp.ts
+- Implemented 60-second rate limiting using otp_codes.createdAt
+- checkOTPCooldown() function returns remaining seconds
+- Email failures don't block registration (graceful degradation)
+- All 6 OTP generation tests passed (format, leading zeros, randomness, expiration, range, consistency)
+- TypeScript compilation passing
+
+**Challenges:**
+- Test script initially imported database which requires DATABASE_URL
+- Fixed by inlining test functions to avoid module-level database connection
+- Resend API returns union type (success | error), handled properly
+
+**Learnings:**
+- crypto.randomInt() produces cryptographically secure random numbers
+- padStart(6, '0') ensures leading zeros (1234 becomes 001234)
+- OTP stored as TEXT in database to preserve leading zeros
+- Transaction ensures atomicity: delete old + insert new in one operation
+- Rate limiting via database query (no Redis needed for MVP)
+- Email sending outside transaction prevents locks
+- sendOTPToUser returns true even if email fails (user can resend)
 
 ## ✅ Completed Chunks
 

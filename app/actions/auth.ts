@@ -2,6 +2,7 @@
 
 import { db, users } from '@/db';
 import { hashPassword, generateToken, setAuthCookie, deleteAuthCookie, verifyPassword } from '@/lib/auth';
+import { sendOTPToUser } from '@/lib/otp';
 import { eq, sql } from 'drizzle-orm';
 import { redirect } from 'next/navigation';
 
@@ -178,6 +179,10 @@ export async function registerUser(
       // Generate JWT and set cookie for automatic login
       const token = await generateToken(newUser.id, newUser.isAdmin);
       await setAuthCookie(token);
+
+      // Send OTP verification email (don't block on failure)
+      // User can request resend if email fails
+      await sendOTPToUser(newUser.id, newUser.email, newUser.username);
 
       // Redirect to feed after successful registration
       redirect('/');
