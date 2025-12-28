@@ -73,9 +73,9 @@
 |-------|------|--------|---------|-----------|----------|
 | 5.1 | R2 Bucket Setup & Connection | ✅ Complete | Dec 28, 2025 | Dec 28, 2025 | ~15 min |
 | 5.2 | Image Processing Pipeline | ✅ Complete | Dec 28, 2025 | Dec 28, 2025 | ~10 min |
-| 5.3 | Upload Server Action & Integration | ⏳ Pending | - | - | - |
+| 5.3 | Upload Server Action & Integration | ✅ Complete | Dec 28, 2025 | Dec 28, 2025 | ~10 min |
 
-**Module Status:** 🚧 In Progress (2/3 chunks complete)  
+**Module Status:** ✅ Complete (3/3 chunks)  
 **Actual Duration:** ~15 min so far  
 **Estimated Duration:** 8-11 hours total
 
@@ -130,6 +130,30 @@
 ---
 
 ## ✅ Completed Chunks
+
+### Chunk 5.3 - Upload Server Action & Integration ✅
+**Completed:** December 28, 2025  
+**Duration:** ~10 minutes  
+**Key Achievements:**
+- Created app/actions/upload.ts with complete upload flow
+- uploadImage() - main Server Action for post images
+- uploadProfilePicture() - specialized for profile pictures
+- deleteUploadedImage() - cleanup utility for post deletion
+- Authentication check with getCurrentUser()
+- FormData extraction with size validation
+- R2 upload with rollback on partial failure
+- Proper NEXT_REDIRECT handling
+- TypeScript compilation and build passing
+
+**Key Design Decisions:**
+- Profile pictures use thumbnail size (400px) to save storage
+- Rollback deletes thumbnail if full-size upload fails
+- Returns blurHash as base64 data URL for immediate CSS use
+- Logs user ID and filename for debugging
+
+**Module 5 Complete!** 🎉 Ready for integration in:
+- Module 4.4: Profile Picture Upload
+- Module 6: Photo Posts & Feed
 
 ### Chunk 5.2 - Image Processing Pipeline ✅
 **Completed:** December 28, 2025  
