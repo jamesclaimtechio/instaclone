@@ -9,6 +9,8 @@ import { sendOTPEmail } from './email';
 
 const OTP_EXPIRATION_MINUTES = 15;
 const RESEND_COOLDOWN_SECONDS = 60;
+const MAX_VERIFICATION_ATTEMPTS = 5;
+const VERIFICATION_LOCKOUT_MINUTES = 15;
 
 // ============================================================================
 // TYPES
@@ -31,6 +33,68 @@ export interface ResendOTPResult {
   success: boolean;
   error?: string;
   cooldownRemaining?: number;
+}
+
+export interface VerifyOTPResult {
+  success: boolean;
+  error?: string;
+  attemptsRemaining?: number;
+}
+
+// ============================================================================
+// RATE LIMITING (In-Memory)
+// ============================================================================
+
+// Track verification attempts: userId -> array of attempt timestamps
+const verificationAttempts = new Map<string, number[]>();
+
+/**
+ * Checks if user can attempt OTP verification (rate limit check)
+ * @param userId - User's UUID
+ * @returns Object with allowed status and remaining attempts
+ */
+export function canAttemptVerification(userId: string): { allowed: boolean; remaining: number } {
+  const attempts = verificationAttempts.get(userId) || [];
+  const lockoutTime = Date.now() - VERIFICATION_LOCKOUT_MINUTES * 60 * 1000;
+  
+  // Filter to attempts within lockout window (15 minutes)
+  const recentAttempts = attempts.filter(timestamp => timestamp > lockoutTime);
+  
+  // Update map with filtered attempts
+  if (recentAttempts.length > 0) {
+    verificationAttempts.set(userId, recentAttempts);
+  } else {
+    verificationAttempts.delete(userId);
+  }
+  
+  const remaining = Math.max(0, MAX_VERIFICATION_ATTEMPTS - recentAttempts.length);
+  
+  return {
+    allowed: recentAttempts.length < MAX_VERIFICATION_ATTEMPTS,
+    remaining,
+  };
+}
+
+/**
+ * Records a failed verification attempt for rate limiting
+ * @param userId - User's UUID
+ * @returns Number of attempts remaining (0 if locked out)
+ */
+export function recordFailedAttempt(userId: string): number {
+  const attempts = verificationAttempts.get(userId) || [];
+  attempts.push(Date.now());
+  verificationAttempts.set(userId, attempts);
+  
+  const { remaining } = canAttemptVerification(userId);
+  return remaining;
+}
+
+/**
+ * Resets verification attempts for a user (on successful verification)
+ * @param userId - User's UUID
+ */
+export function resetVerificationAttempts(userId: string): void {
+  verificationAttempts.delete(userId);
 }
 
 // ============================================================================

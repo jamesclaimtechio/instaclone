@@ -128,7 +128,7 @@ Total:         [██░░░░░░░░] 15% (2/13 modules)
 - [x]  Resend API integrated
 - [x]  OTP generation (6-digit, 15-min expiry)
 - [x]  Email templates (verification)
-- [ ]  OTP validation logic
+- [x]  OTP validation logic
 - [x]  Resend OTP functionality
 - [ ]  Unverified user restrictions
 
