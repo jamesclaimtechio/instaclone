@@ -51,6 +51,8 @@ export interface ProfileData {
   stats: ProfileStats;
   posts: ProfilePost[];
   isOwnProfile: boolean;
+  /** Whether the current user is following this profile (undefined if not logged in or own profile) */
+  isFollowing?: boolean;
 }
 
 // ============================================================================

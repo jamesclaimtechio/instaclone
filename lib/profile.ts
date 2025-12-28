@@ -1,5 +1,5 @@
 import { db, users, posts, follows } from '@/db';
-import { eq, desc, sql, count } from 'drizzle-orm';
+import { eq, desc, sql, count, and } from 'drizzle-orm';
 
 // Re-export types and utilities from the client-safe file
 export * from './profile.types';
@@ -146,10 +146,10 @@ export async function getProfilePosts(
 
 /**
  * Fetches complete profile data for a user
- * Combines user info, stats, posts, and ownership flag into single response
+ * Combines user info, stats, posts, ownership flag, and follow status into single response
  * 
  * @param username - The username to fetch profile for
- * @param currentUserId - Optional current user ID for ownership detection
+ * @param currentUserId - Optional current user ID for ownership detection and follow status
  * @returns ProfileData object or null if user not found
  */
 export async function getFullProfile(
@@ -166,18 +166,56 @@ export async function getFullProfile(
     return null;
   }
 
-  // User exists - fetch stats and posts in parallel
-  const [stats, postsResponse] = await Promise.all([
+  // Check if viewing own profile
+  const viewingOwnProfile = isOwnProfile(currentUserId ?? null, user.id);
+
+  // User exists - fetch stats, posts, and optionally follow status in parallel
+  const [stats, postsResponse, isFollowing] = await Promise.all([
     getProfileStats(user.id),
     getProfilePosts(user.id),
+    // Only check follow status if logged in and not viewing own profile
+    currentUserId && !viewingOwnProfile
+      ? getFollowStatus(currentUserId, user.id)
+      : Promise.resolve(undefined),
   ]);
 
   return {
     user,
     stats,
     posts: postsResponse.posts,
-    isOwnProfile: isOwnProfile(currentUserId ?? null, user.id),
+    isOwnProfile: viewingOwnProfile,
+    isFollowing,
   };
+}
+
+/**
+ * Check if a user is following another user
+ * 
+ * @param followerId - The user who may be following
+ * @param followingId - The user who may be followed
+ * @returns true if following, false otherwise
+ */
+async function getFollowStatus(
+  followerId: string,
+  followingId: string
+): Promise<boolean> {
+  try {
+    const result = await db
+      .select({ id: follows.id })
+      .from(follows)
+      .where(
+        and(
+          eq(follows.followerId, followerId),
+          eq(follows.followingId, followingId)
+        )
+      )
+      .limit(1);
+
+    return result.length > 0;
+  } catch (error) {
+    console.error('[getFollowStatus] Error:', error);
+    return false;
+  }
 }
 
 /**
