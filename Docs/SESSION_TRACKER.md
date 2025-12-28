@@ -6,8 +6,8 @@
 
 ## 📊 Current Status
 
-**Active Module:** Module 7 - Likes System  
-**Active Chunk:** Chunk 7.3 - Like State Persistence & Edge Cases  
+**Active Module:** Module 8 - Comments System  
+**Active Chunk:** Chunk 8.1 - Comments Data Layer  
 **Status:** ✅ Complete  
 **Started:** December 28, 2025
 
@@ -105,6 +105,19 @@
 **Module Status:** ✅ Complete (3/3 chunks)  
 **Actual Duration:** ~45 min  
 **Estimated Duration:** 8-12 hours total
+
+### Module 8: Comments System (1/4 chunks)
+
+| Chunk | Name | Status | Started | Completed | Duration |
+|-------|------|--------|---------|-----------|----------|
+| 8.1 | Comments Data Layer | ✅ Complete | Dec 28, 2025 | Dec 28, 2025 | ~15 min |
+| 8.2 | Comment Input UI with Optimistic Updates | ⏳ Pending | - | - | - |
+| 8.3 | Comment Display & Threading | ⏳ Pending | - | - | - |
+| 8.4 | Comment Moderation & Deletion | ⏳ Pending | - | - | - |
+
+**Module Status:** 🚧 In Progress (1/4 chunks)  
+**Actual Duration:** ~15 min so far  
+**Estimated Duration:** 12-18 hours total
 
 ---
 
