@@ -1,13 +1,14 @@
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
-import { ArrowLeft, Heart, MessageCircle } from 'lucide-react';
+import { ArrowLeft, MessageCircle } from 'lucide-react';
 import { getPostById, formatPostTimestamp, validatePostOwnership } from '@/lib/posts';
 import { getAvatarUrl } from '@/lib/profile';
 import { getCurrentUser } from '@/lib/auth';
 import { Button } from '@/components/ui/button';
 import CommentsSection from '@/components/posts/comments-section';
 import DeletePostButton from '@/components/posts/delete-post-button';
+import LikeButton from '@/components/posts/like-button';
 
 // ============================================================================
 // TYPES
@@ -75,7 +76,7 @@ export default async function PostPage({ params }: PostPageProps) {
     ? validatePostOwnership(currentUser.userId, post)
     : false;
 
-  const { author, caption, imageUrl, blurHash, likeCount, commentCount, createdAt } = post;
+  const { author, caption, imageUrl, blurHash, likeCount, commentCount, createdAt, isLiked } = post;
   const timestamp = formatPostTimestamp(createdAt);
   const avatarUrl = getAvatarUrl(author.profilePictureUrl, author.username);
 
@@ -183,12 +184,11 @@ export default async function PostPage({ params }: PostPageProps) {
               <footer className="border-t p-4">
                 {/* Action buttons */}
                 <div className="flex items-center gap-4 mb-3">
-                  <button
-                    className="flex items-center gap-1 text-gray-600 hover:text-red-500 transition-colors"
-                    aria-label="Like"
-                  >
-                    <Heart className="h-6 w-6" />
-                  </button>
+                  <LikeButton
+                    postId={post.id}
+                    initialLikeCount={likeCount}
+                    initialIsLiked={isLiked}
+                  />
                   <button
                     className="flex items-center gap-1 text-gray-600 hover:text-blue-500 transition-colors"
                     aria-label="Comment"
@@ -196,11 +196,6 @@ export default async function PostPage({ params }: PostPageProps) {
                     <MessageCircle className="h-6 w-6" />
                   </button>
                 </div>
-
-                {/* Counts */}
-                <p className="font-semibold text-sm mb-1">
-                  {likeCount.toLocaleString()} {likeCount === 1 ? 'like' : 'likes'}
-                </p>
 
                 {/* Full date */}
                 <time dateTime={createdAt.toISOString()} className="text-xs text-gray-500">

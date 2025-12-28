@@ -2,9 +2,10 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { Heart, MessageCircle } from 'lucide-react';
+import { MessageCircle } from 'lucide-react';
 import { formatPostTimestamp, FeedPost } from '@/lib/posts.types';
 import { getAvatarUrl } from '@/lib/profile.types';
+import LikeButton from '@/components/posts/like-button';
 
 // ============================================================================
 // TYPES
@@ -23,7 +24,7 @@ interface PostCardProps {
  * Displays author info, image with blur placeholder, caption, and engagement counts
  */
 export default function PostCard({ post }: PostCardProps) {
-  const { author, caption, thumbnailUrl, blurHash, likeCount, commentCount, createdAt, id } = post;
+  const { author, caption, thumbnailUrl, blurHash, likeCount, commentCount, createdAt, id, isLiked } = post;
   
   // Format timestamp
   const timestamp = formatPostTimestamp(createdAt);
@@ -78,14 +79,13 @@ export default function PostCard({ post }: PostCardProps) {
 
       {/* Actions and Counts */}
       <div className="p-3 space-y-2">
-        {/* Action buttons (like/comment icons - not functional yet) */}
+        {/* Action buttons */}
         <div className="flex items-center gap-4">
-          <button 
-            className="flex items-center gap-1 text-gray-600 hover:text-red-500 transition-colors"
-            aria-label={`${likeCount} likes`}
-          >
-            <Heart className="h-6 w-6" />
-          </button>
+          <LikeButton 
+            postId={id}
+            initialLikeCount={likeCount}
+            initialIsLiked={isLiked}
+          />
           <Link 
             href={`/post/${id}`}
             className="flex items-center gap-1 text-gray-600 hover:text-blue-500 transition-colors"
@@ -94,11 +94,6 @@ export default function PostCard({ post }: PostCardProps) {
             <MessageCircle className="h-6 w-6" />
           </Link>
         </div>
-
-        {/* Like count */}
-        <p className="font-semibold text-sm">
-          {likeCount === 0 ? 'Be the first to like' : `${likeCount.toLocaleString()} ${likeCount === 1 ? 'like' : 'likes'}`}
-        </p>
 
         {/* Caption */}
         {caption && (
