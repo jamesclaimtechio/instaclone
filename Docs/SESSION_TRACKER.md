@@ -63,9 +63,21 @@
 | 4.3 | Profile Editing & Bio Update | ✅ Complete | Dec 28, 2025 | Dec 28, 2025 | ~20 min |
 | 4.4 | Profile Picture Upload | ⏳ Pending | - | - | - |
 
-**Module Status:** 🚧 In Progress (3/4 chunks complete)  
+**Module Status:** 🟡 3/4 complete (Chunk 4.4 blocked on Module 5)  
 **Actual Duration:** ~65 min so far  
 **Estimated Duration:** 10-14 hours total
+
+### Module 5: Image Upload & R2 Storage (1/3 chunks)
+
+| Chunk | Name | Status | Started | Completed | Duration |
+|-------|------|--------|---------|-----------|----------|
+| 5.1 | R2 Bucket Setup & Connection | ✅ Complete | Dec 28, 2025 | Dec 28, 2025 | ~15 min |
+| 5.2 | Image Processing Pipeline | ⏳ Pending | - | - | - |
+| 5.3 | Upload Server Action & Integration | ⏳ Pending | - | - | - |
+
+**Module Status:** 🚧 In Progress (1/3 chunks complete)  
+**Actual Duration:** ~15 min so far  
+**Estimated Duration:** 8-11 hours total
 
 ---
 
@@ -118,6 +130,31 @@
 ---
 
 ## ✅ Completed Chunks
+
+### Chunk 5.1 - R2 Bucket Setup & Connection ✅
+**Completed:** December 28, 2025  
+**Duration:** ~15 minutes  
+**Key Achievements:**
+- Installed @aws-sdk/client-s3 v3.958.0
+- Created lib/r2.ts with complete R2 client utility
+- Implemented singleton pattern for S3 client
+- Lazy environment variable validation (avoids build-time errors)
+- Created uploadToR2() for file uploads with content type
+- Created deleteFromR2() for file cleanup
+- Created constructPublicUrl() for generating accessible URLs
+- Created verifyR2Connection() for testing bucket access
+- Defined R2_FOLDERS constants for organized storage
+- TypeScript compilation passing
+- Production build successful
+
+**Challenges:**
+- None - user already configured R2 bucket, CORS, and public access
+
+**Learnings:**
+- R2 endpoint format: https://[account-id].r2.cloudflarestorage.com
+- R2 ignores region but SDK requires it (use 'auto')
+- Lazy initialization prevents build-time errors when env vars not set
+- S3 SDK v3 uses command pattern (PutObjectCommand, etc.)
 
 ### Chunk 4.3 - Profile Editing & Bio Update ✅
 **Completed:** December 28, 2025  
