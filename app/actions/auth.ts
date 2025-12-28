@@ -213,10 +213,20 @@ export async function registerUser(
         }
       }
 
+      // Re-throw NEXT_REDIRECT - it's not an error, it's how redirect() works
+      if (insertError?.digest?.includes('NEXT_REDIRECT')) {
+        throw insertError;
+      }
+
       // Re-throw unexpected errors to be caught by outer try-catch
       throw insertError;
     }
-  } catch (error) {
+  } catch (error: any) {
+    // NEXT_REDIRECT is thrown by redirect() - let it propagate, don't catch!
+    if (error?.digest?.includes('NEXT_REDIRECT')) {
+      throw error;
+    }
+    
     console.error('Registration error:', error);
     return {
       success: false,
@@ -294,7 +304,12 @@ export async function loginUser(formData: FormData): Promise<LoginResult> {
 
     // Redirect to feed after successful login
     redirect('/');
-  } catch (error) {
+  } catch (error: any) {
+    // NEXT_REDIRECT is thrown by redirect() - let it propagate, don't catch!
+    if (error?.digest?.includes('NEXT_REDIRECT')) {
+      throw error;
+    }
+    
     console.error('Login error:', error);
     return {
       success: false,
