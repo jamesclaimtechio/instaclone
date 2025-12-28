@@ -7,7 +7,7 @@
 ## 📊 Current Status
 
 **Active Module:** Module 4 - User Profiles  
-**Active Chunk:** Chunk 4.1 - Profile Data Layer & Queries  
+**Active Chunk:** Chunk 4.2 - Profile Viewing Pages  
 **Status:** ✅ Complete  
 **Started:** December 27, 2025
 
@@ -59,12 +59,12 @@
 | Chunk | Name | Status | Started | Completed | Duration |
 |-------|------|--------|---------|-----------|----------|
 | 4.1 | Profile Data Layer & Queries | ✅ Complete | Dec 28, 2025 | Dec 28, 2025 | ~20 min |
-| 4.2 | Profile Viewing Pages | ⏳ Pending | - | - | - |
+| 4.2 | Profile Viewing Pages | ✅ Complete | Dec 28, 2025 | Dec 28, 2025 | ~25 min |
 | 4.3 | Profile Editing & Bio Update | ⏳ Pending | - | - | - |
 | 4.4 | Profile Picture Upload | ⏳ Pending | - | - | - |
 
-**Module Status:** 🚧 In Progress (1/4 chunks complete)  
-**Actual Duration:** ~20 min so far  
+**Module Status:** 🚧 In Progress (2/4 chunks complete)  
+**Actual Duration:** ~45 min so far  
 **Estimated Duration:** 10-14 hours total
 
 ---
@@ -118,6 +118,34 @@
 ---
 
 ## ✅ Completed Chunks
+
+### Chunk 4.2 - Profile Viewing Pages ✅
+**Completed:** December 28, 2025  
+**Duration:** ~25 minutes  
+**Key Achievements:**
+- Created components/profile/ directory with all profile components
+- Built ProfileHeader with responsive layout (mobile/desktop)
+- Built ProfileStats with singular/plural logic ("1 follower" vs "2 followers")
+- Built PostsGrid with responsive CSS Grid (1/2/3 columns)
+- Built PostThumbnail with hover overlay
+- Built EmptyPosts with different messages for own vs other profiles
+- Created app/profile/[username]/page.tsx Server Component
+- Created app/profile/[username]/not-found.tsx custom 404
+- Created app/profile/[username]/loading.tsx skeleton
+- Created /@username redirect route (app/%40[username]/page.tsx)
+- Created reusable UsernameLink component
+- Added SEO metadata generation for profile pages
+- TypeScript compilation passing
+- Production build successful
+
+**Challenges:**
+- None - straightforward implementation following the plan
+
+**Learnings:**
+- Next.js dynamic params in App Router are Promise-based (must await)
+- @ symbol in routes must be URL-encoded as %40 in folder name
+- notFound() function from next/navigation triggers 404 page
+- Image component with fill prop requires relative parent container
 
 ### Chunk 4.1 - Profile Data Layer & Queries ✅
 **Completed:** December 28, 2025  
