@@ -1,6 +1,10 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // Server Actions body size limit - must match MAX_FILE_SIZE in lib/image.ts
+  serverActions: {
+    bodySizeLimit: '50mb',
+  },
   images: {
     remotePatterns: [
       // Cloudflare R2 public URLs (dev URLs)
