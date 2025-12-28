@@ -1,4 +1,4 @@
-import { ProfileStats as ProfileStatsType } from '@/lib/profile.types';
+import { ProfileStats as ProfileStatsType, formatCount } from '@/lib/profile.types';
 
 interface ProfileStatsProps {
   stats: ProfileStatsType;
@@ -6,6 +6,7 @@ interface ProfileStatsProps {
 
 /**
  * Displays follower, following, and posts counts with proper singular/plural
+ * and compact formatting for large numbers (1.2K, 10K, 1.5M)
  */
 export default function ProfileStats({ stats }: ProfileStatsProps) {
   return (
@@ -31,11 +32,13 @@ function StatItem({ count, label }: StatItemProps) {
       ? label 
       : `${label}s`;
 
+  // Format count with compact notation (1.2K, 10K, 1.5M)
+  const formattedCount = formatCount(count);
+
   return (
     <div className="text-center sm:text-left">
-      <span className="font-semibold text-lg">{count.toLocaleString()}</span>
+      <span className="font-semibold text-lg tabular-nums">{formattedCount}</span>
       <span className="text-gray-600 ml-1">{displayLabel}</span>
     </div>
   );
 }
-

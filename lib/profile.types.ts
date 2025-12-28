@@ -99,3 +99,37 @@ export function getAvatarUrl(
   return profilePictureUrl || getDefaultAvatarUrl(username);
 }
 
+/**
+ * Format a count for display with compact notation
+ * Examples:
+ * - 0 → "0"
+ * - 999 → "999"
+ * - 1200 → "1.2K"
+ * - 10000 → "10K"
+ * - 1500000 → "1.5M"
+ * 
+ * @param count - The number to format
+ * @returns Formatted string
+ */
+export function formatCount(count: number): string {
+  // Ensure non-negative
+  const safeCount = Math.max(0, count);
+  
+  if (safeCount < 1000) {
+    return safeCount.toString();
+  }
+  
+  if (safeCount < 10000) {
+    // 1,000 - 9,999: Show one decimal (1.2K)
+    return (safeCount / 1000).toFixed(1).replace(/\.0$/, '') + 'K';
+  }
+  
+  if (safeCount < 1000000) {
+    // 10,000 - 999,999: Round to nearest K (10K, 100K)
+    return Math.round(safeCount / 1000) + 'K';
+  }
+  
+  // 1,000,000+: Show one decimal (1.5M)
+  return (safeCount / 1000000).toFixed(1).replace(/\.0$/, '') + 'M';
+}
+
