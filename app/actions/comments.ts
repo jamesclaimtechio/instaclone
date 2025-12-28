@@ -8,11 +8,37 @@ import {
   postExists,
   getCommentWithPost,
   getCommentCount,
+  getPostComments,
   createCommentRecord,
   deleteCommentRecord,
   canDeleteComment,
   type CommentActionResult,
+  type PostComment,
 } from '@/lib/comments';
+
+// ============================================================================
+// GET COMMENTS SERVER ACTION
+// ============================================================================
+
+/**
+ * Fetches comments for a post
+ * This is a server action safe to call from client components
+ * 
+ * @param postId - The post ID to fetch comments for
+ * @returns Array of comments with author info
+ */
+export async function getComments(postId: string): Promise<PostComment[]> {
+  if (!isValidUUID(postId)) {
+    return [];
+  }
+
+  try {
+    return await getPostComments(postId);
+  } catch (error) {
+    console.error('[GetComments] Error:', error);
+    return [];
+  }
+}
 
 // ============================================================================
 // CREATE COMMENT SERVER ACTION

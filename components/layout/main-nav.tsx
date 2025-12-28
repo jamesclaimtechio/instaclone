@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation';
 import { Home, PlusSquare, User, LogOut } from 'lucide-react';
 import { logoutUser } from '@/app/actions/auth';
 import { Button } from '@/components/ui/button';
+import SearchBar from '@/components/search/search-bar';
 
 // ============================================================================
 // TYPES
@@ -61,6 +62,11 @@ export default function MainNav({ username }: MainNavProps) {
           >
             InstaClone
           </Link>
+
+          {/* Search Bar - Desktop only */}
+          <div className="hidden md:block flex-1 max-w-xs mx-4">
+            <SearchBar />
+          </div>
 
           {/* Navigation Items */}
           <div className="flex items-center justify-around w-full md:w-auto md:gap-6">

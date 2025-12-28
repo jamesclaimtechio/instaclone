@@ -6,8 +6,7 @@ import Link from 'next/link';
 import { MessageCircle, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import CommentInput from './comment-input';
-import { getPostComments } from '@/lib/comments';
-import { deleteComment } from '@/app/actions/comments';
+import { getComments, deleteComment } from '@/app/actions/comments';
 import { 
   type PostComment, 
   formatCommentTimestamp, 
@@ -85,7 +84,7 @@ export default function CommentsSection({
   const fetchComments = async () => {
     setIsLoading(true);
     try {
-      const fetchedComments = await getPostComments(postId);
+      const fetchedComments = await getComments(postId);
       setComments(fetchedComments);
     } catch (error) {
       console.error('[CommentsSection] Error fetching comments:', error);
