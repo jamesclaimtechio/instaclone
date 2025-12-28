@@ -102,7 +102,12 @@ export default function RegistrationForm() {
         // Show error
         setErrors(result.error);
       }
-    } catch (error) {
+    } catch (error: any) {
+      // NEXT_REDIRECT is thrown by redirect() in Server Actions - let it propagate
+      if (error?.message?.includes('NEXT_REDIRECT') || error?.digest?.includes('NEXT_REDIRECT')) {
+        throw error; // Let Next.js handle the redirect
+      }
+      
       console.error('Registration error:', error);
       setErrors({
         field: 'general',

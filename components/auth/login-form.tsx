@@ -58,7 +58,12 @@ function LoginFormInner() {
         // Show error
         setError(result.error.message);
       }
-    } catch (error) {
+    } catch (error: any) {
+      // NEXT_REDIRECT is thrown by redirect() in Server Actions - let it propagate
+      if (error?.message?.includes('NEXT_REDIRECT') || error?.digest?.includes('NEXT_REDIRECT')) {
+        throw error; // Let Next.js handle the redirect
+      }
+      
       console.error('Login error:', error);
       setError('Something went wrong. Please try again.');
     } finally {
