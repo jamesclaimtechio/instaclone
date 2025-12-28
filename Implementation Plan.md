@@ -100,11 +100,11 @@ Total:         [█░░░░░░░░░] 8% (1/13 modules)
 **Deliverables:**
 
 - [x]  Registration Server Action (logic complete, UI in Chunk 2.5)
-- [ ]  Login page with credential validation
+- [x]  Login Server Action with credential validation
 - [x]  JWT generation with bcrypt password hashing
 - [x]  HTTP-only cookie implementation
 - [ ]  Middleware protecting routes
-- [ ]  Logout functionality
+- [x]  Logout Server Action
 
 **Completion Criteria:**
 

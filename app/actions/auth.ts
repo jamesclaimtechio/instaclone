@@ -1,7 +1,7 @@
 'use server';
 
 import { db, users } from '@/db';
-import { hashPassword, generateToken, setAuthCookie } from '@/lib/auth';
+import { hashPassword, generateToken, setAuthCookie, deleteAuthCookie, verifyPassword } from '@/lib/auth';
 import { eq, sql } from 'drizzle-orm';
 import { redirect } from 'next/navigation';
 
@@ -23,6 +23,20 @@ type RegistrationSuccess = {
 };
 
 type RegistrationResult = RegistrationError | RegistrationSuccess;
+
+type LoginError = {
+  success: false;
+  error: {
+    message: string;
+  };
+};
+
+type LoginSuccess = {
+  success: true;
+  redirect: string;
+};
+
+type LoginResult = LoginError | LoginSuccess;
 
 // ============================================================================
 // VALIDATION UTILITIES
@@ -207,5 +221,90 @@ export async function registerUser(
       },
     };
   }
+}
+
+/**
+ * Logs in a user with email and password
+ * Uses timing-safe password verification to prevent user enumeration
+ */
+export async function loginUser(formData: FormData): Promise<LoginResult> {
+  try {
+    // Extract and sanitize form data
+    const email = formData.get('email')?.toString().trim() || '';
+    const password = formData.get('password')?.toString() || '';
+
+    // Validate email format
+    if (!email || !isValidEmail(email)) {
+      return {
+        success: false,
+        error: {
+          message: 'Please enter a valid email address',
+        },
+      };
+    }
+
+    // Validate password is present
+    if (!password || password.trim().length === 0) {
+      return {
+        success: false,
+        error: {
+          message: 'Password is required',
+        },
+      };
+    }
+
+    // Look up user by email (case-insensitive)
+    const normalizedEmail = email.toLowerCase();
+    const user = await db.query.users.findFirst({
+      where: sql`LOWER(${users.email}) = ${normalizedEmail}`,
+    });
+
+    // Timing-safe handling: if user not found, hash dummy password to maintain consistent timing
+    if (!user) {
+      // Hash a dummy password to make timing consistent with the password verification path
+      await hashPassword('dummy_password_for_timing_safety_12345');
+      return {
+        success: false,
+        error: {
+          message: 'Invalid credentials',
+        },
+      };
+    }
+
+    // Verify password using timing-safe bcrypt comparison
+    const isPasswordValid = await verifyPassword(password, user.passwordHash);
+    
+    if (!isPasswordValid) {
+      return {
+        success: false,
+        error: {
+          message: 'Invalid credentials',
+        },
+      };
+    }
+
+    // Password is correct - generate JWT and set cookie
+    const token = await generateToken(user.id, user.isAdmin);
+    await setAuthCookie(token);
+
+    // Redirect to feed after successful login
+    redirect('/');
+  } catch (error) {
+    console.error('Login error:', error);
+    return {
+      success: false,
+      error: {
+        message: 'Something went wrong. Please try again.',
+      },
+    };
+  }
+}
+
+/**
+ * Logs out the current user by clearing the authentication cookie
+ */
+export async function logoutUser(): Promise<void> {
+  await deleteAuthCookie();
+  redirect('/login');
 }
 
